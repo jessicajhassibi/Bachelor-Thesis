@@ -1,60 +1,119 @@
-"""
-Holds the from the bachelor_thesis jupyter notebook in case the reader doesn't use jupyter.
-"""
-import json
-import os
-import wikipediaapi
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[50]:
 
 
-def print_categories(page):
-    categories = page.categories
-    for title in sorted(categories.keys()):
-        print("%s: %s" % (title, categories[title]))
+import wikipedia_helpers
+import pandas as pd
+import gensim.utils
 
-if __name__ == '__main__':
-    page_of_all_composers = "Liste der vom NS-Regime oder seinen Verbündeten verfolgten Komponisten"
-    wiki_wiki = wikipediaapi.Wikipedia(
-        language="de",
-        extract_format=wikipediaapi.ExtractFormat.WIKI
-    )
-    wiki_page = wiki_wiki.page(page_of_all_composers)
-    persecuted_composers = [key for key in wiki_page.links.keys()] # TODO: Entferne Links, zu Seiten, die keine Komponisten sind? Oder drin lassen?
-    #print_categories(wiki_page)
 
-    file = "data/komponisten_texte_deutsch.json"
-    # check if file exists
-    if os.path.isfile(file):
-        print("Texts have already been scraped to:", file)
-        with open(file, "r", encoding="utf8") as json_file:
-            json_file_text = json_file.read()
-            composer_texts_dict = json.loads(json_file_text)
+# In[51]:
 
-    else:
-        # get german text from each composers wikipedia page and save in json-file
-        with open(file, "w") as json_file:
-            composer_texts_dict = {}
-            for composer in persecuted_composers:
-                composer_wiki_page = wiki_wiki.page(composer)
-                # exclude non-existing articles, and all articles which are not about a composer
-                valid_composer = False
-                for key in composer_wiki_page.categories.keys():
-                    if "Komponist" in key or "komponist" in key:
-                        valid_composer = True
-                        break
-                if valid_composer:
-                    print("Processing wikipedia page of", composer)
-                    # composer_wiki_page.sections TODO: Überschriften, Literatur etc. aus Text entfernen?
-                    composer_text = composer_wiki_page.text
-                    # composer_text = composer_text.replace("\n\n\n", " ")
-                    # composer_text = composer_text.replace("\n\n", " ")
-                    # composer_text = composer_text.replace("\n", " ")
-                    composer_texts_dict[composer] = composer_text
-                    # get other languages:
-                    # composer_wiki_page.langlinks
-            json.dump(composer_texts_dict, json_file, indent=4, ensure_ascii=False)
 
-        print(len(composer_texts_dict), "of", len(persecuted_composers), "are valid wikipedia pages of composers.")
+# path to save wikipedia texts to or load from if file already existing
+path = "data/komponisten_texte.json"
 
+# create dictionary with composers as keys and \
+# for each key a dictionary with the texts of the wikipedia articles \
+# in the languages german, arabic, english, italian, french and spanish
+data_dict = wikipedia_helpers.extract_composers_texts(path)
+
+
+# In[52]:
+
+
+df = pd.read_json(path)
+# transpose index and columns of df
+df = df.transpose()
+df.head()
+
+
+# In[53]:
+
+
+df.shape
+
+
+# In[54]:
+
+
+df.de_title
+
+
+# In[146]:
+
+
+de_texts_processed = df.de_text.apply(gensim.utils.simple_preprocess)
+en_texts_processed = df.en_text.apply(gensim.utils.simple_preprocess)
+ar_texts_processed = df.ar_text.apply(gensim.utils.simple_preprocess)
+fr_texts_processed = df.fr_text.apply(gensim.utils.simple_preprocess)
+es_texts_processed = df.es_text.apply(gensim.utils.simple_preprocess)
+it_texts_processed = df.it_text.apply(gensim.utils.simple_preprocess)
+
+
+# In[151]:
+
+
+model = gensim.models.Word2Vec(
+    window=10,
+    min_count=2,
+    workers=4
+)
+# experiment with parameters, e.g. window=5
+
+
+# In[152]:
+
+
+model.build_vocab(de_texts_processed, progress_per=10)
+
+
+# In[153]:
+
+
+model.epochs
+
+
+# In[154]:
+
+
+model.train(de_texts_processed, total_examples=model.corpus_count, epochs=model.epochs)
+
+
+# In[155]:
+
+
+model.save("word2vec_de.model")
+
+
+# In[156]:
+
+
+# find words used in similar surrounding 
+model.wv.most_similar("jüdisch")
+
+
+# In[158]:
+
+
+model.wv.similarity(w1="pianist", w2="violinist") # Ohje...
+
+
+# In[159]:
+
+
+model.wv.doesnt_match(['pianist', 'violinist', 'nazi'])
+
+
+# In[164]:
+
+
+
+
+
+# In[ ]:
 
 
 

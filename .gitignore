@@ -1,3 +1,5 @@
 .idea
 .ipynb_checkpoints
 .DS_Store
+word2vec_de.model
+word2vec_en.model

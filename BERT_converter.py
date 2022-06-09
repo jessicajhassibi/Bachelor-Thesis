@@ -1,3 +1,6 @@
+"""
+Author: texttechnologylab
+"""
 import json
 from transformers import AutoModel, AutoTokenizer
 from sentence_transformers import SentenceTransformer

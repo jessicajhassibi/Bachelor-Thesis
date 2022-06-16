@@ -1,8 +1,12 @@
-# run with pip install
-transformers
 pandas
+numpy
+#ipykernel
+#nb_conda_kernels
+tensorflow
+jupyter
+transformers
 gensim
-sentence_transformers
+sentence-transformers
 Wikipedia-API
 nltk
 top2vec

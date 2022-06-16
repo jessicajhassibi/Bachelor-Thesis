@@ -22,7 +22,7 @@ data_dict = wikipedia_helpers.extract_composers_texts(path)
 
 
 # In[52]:
-
+"""
 
 df = pd.read_json(path)
 # transpose index and columns of df
@@ -91,14 +91,14 @@ model.save("word2vec_de.model")
 # In[156]:
 
 
-# find words used in similar surrounding 
+# find words used in similar surrounding
 model.wv.most_similar("jüdisch")
 
 
 # In[158]:
 
 
-model.wv.similarity(w1="pianist", w2="violinist") # Ohje...
+model.wv.similarity(w1="pianist", w2="violinist")
 
 
 # In[159]:
@@ -114,7 +114,7 @@ model.wv.doesnt_match(['pianist', 'violinist', 'nazi'])
 
 
 # In[ ]:
-
+"""
 
 
 

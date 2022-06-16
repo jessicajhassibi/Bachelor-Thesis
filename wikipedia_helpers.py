@@ -1,7 +1,7 @@
 import json
 import os
 import wikipediaapi
-from jsonlines import jsonlines
+import re
 
 
 def print_categories(page):
@@ -15,9 +15,9 @@ def extract_composers_texts(file):
     # TODO remove not
     if os.path.isfile(file):
         print("Texts have already been scraped to:", file)
-        with open(file, "r", encoding="utf8") as json_file:
+        with open(file, "r", encoding="utf-8") as json_file:
             json_file_text = json_file.read()
-            composer_texts_dict = json.loads(json_file_text)
+            pages_texts_dict = json.loads(json_file_text)
     else:
         page_of_all_composers = "Liste der vom NS-Regime oder seinen Verbündeten verfolgten Komponisten"
         wiki_wiki = wikipediaapi.Wikipedia(
@@ -25,39 +25,39 @@ def extract_composers_texts(file):
             extract_format=wikipediaapi.ExtractFormat.WIKI
         )
         wiki_page = wiki_wiki.page(page_of_all_composers)
-        persecuted_composers = [key for key in wiki_page.links.keys()]
+        linked_pages = [key for key in wiki_page.links.keys()]
         # print_categories(wiki_page)
 
         with open(file, "w") as json_file:
-            composer_texts_dict = {}
+            pages_texts_dict = {}
             i = 0
-            for composer in persecuted_composers:
+            for page in linked_pages:
                 try:
-                    composer_wiki_page = wiki_wiki.page(composer)
-                    # exclude non-existing articles, and all articles which are not about a composer
-                    #TODO set to False
+                    wiki_page = wiki_wiki.page(page)
+                    #set to False, if you want just composers!
                     is_valid_composer = True
                     #for key in composer_wiki_page.categories.keys():
+                    # exclude non-existing articles, and all articles which are not about a composer
                     #    if "Komponist" in key or "komponist" in key:
                     #        is_valid_composer = True
                     #        break
                     if is_valid_composer:
                         i+=1
-                        print("\nProcessing wikipedia pages of", composer)
-                        composer_texts_dict[i] = {"de_title": "",
-                                                  "de_text": "",
+                        print("\nProcessing wikipedia pages of", page)
+                        pages_texts_dict[i] = {"de_title": "",
+                                                  "de_texts": "",
                                                   "en_title": "",
-                                                  "en_text": "",
+                                                  "en_texts": "",
                                                   "ar_title": "",
-                                                  "ar_text": "",
+                                                  "ar_texts": "",
                                                   "fr_title": "",
-                                                  "fr_text": "",
+                                                  "fr_texts": "",
                                                   "it_title": "",
-                                                  "it_text": "",
+                                                  "it_texts": "",
                                                   "es_title": "",
-                                                  "es_text": "",
+                                                  "es_texts": "",
                                                   }
-                        composer_page = composer_wiki_page
+                        linked_page = wiki_page
                         # get all languages:
                         # print(composer_wiki_page.langlinks)
                         languages = ["de", "en", "ar", "fr", "it", "es"]
@@ -67,22 +67,37 @@ def extract_composers_texts(file):
                             try:
                                 if lang != "de":
                                     # get wiki article of composer in foreign language
-                                    composer_page = composer_wiki_page.langlinks[lang]
-                                composer_lang = composer_page.title
-                                composer_text = composer_page.text
-                                # composer_wiki_page.sections TODO: Überschriften, Literatur etc. aus Text entfernen?
-                                # composer_text = composer_text.replace("\n\n\n", " ")
-                                # composer_text = composer_text.replace("\n\n", " ")
-                                # composer_text = composer_text.replace("\n", " ")
-                                composer_texts_dict[i][key_title] = composer_lang
-                                composer_texts_dict[i][key_text] = composer_text
+                                    linked_page = wiki_page.langlinks[lang]
+                                page_lang = linked_page.title
+                                pages_texts_dict[i][key_title] = page_lang
+
+                                # Run this code to set each paragraph as a document
+                                page_sections = linked_page.sections
+                                page_documents = []
+                                for section in page_sections:
+                                    #TODO: Werke & Nachweise entfernen?
+                                    cleaned_text = re.sub('=+\s*.+\s*=+', '', section.text)  # removes section header "== Einzelnachweise =="
+                                    cleaned_text = re.sub('\n\n.+\n', ' ', cleaned_text)  # removes other section headers
+                                    cleaned_text = re.sub('\n\n\n', '', cleaned_text)  # removes new lines at end of article
+                                    cleaned_text = re.sub('\n', ' ', cleaned_text)
+                                    if cleaned_text!="":
+                                        page_documents.append(cleaned_text)
+                                pages_texts_dict[i][key_text] = page_documents
+
+                                # or whole article as one document:
+                                # cleaned_text = re.sub('=+\s*.+\s*=+', '', linked_page.text)  # removes section header "== Einzelnachweise =="
+                                # cleaned_text = re.sub('\n\n.+\n', ' ', cleaned_text)  # removes other section headers
+                                # cleaned_text = re.sub('\n\n\n', '', cleaned_text)  # removes new lines at end of article
+                                # cleaned_text = re.sub('\n', ' ', cleaned_text)
+                                #pages_texts_dict[i][key_text] = cleaned_text
+
                             except KeyError:
                                 print(lang, "article not existing.")
-                                composer_texts_dict[i][key_title] = ""
-                                composer_texts_dict[i][key_text] = ""
+                                pages_texts_dict[i][key_title] = ""
+                                pages_texts_dict[i][key_text] = ""
                 except Exception as err:
                     print("Except")
-            json.dump(composer_texts_dict, json_file, indent=4, ensure_ascii=False, separators=(",", ": "))
-        print(len(composer_texts_dict), "of", len(persecuted_composers),
+            json.dump(pages_texts_dict, json_file, indent=4, ensure_ascii=False, separators=(",", ": "))
+        print(len(pages_texts_dict), "of", len(linked_pages),
               "links in wikipedia liste are valid composers.")
-        return composer_texts_dict
+        return pages_texts_dict

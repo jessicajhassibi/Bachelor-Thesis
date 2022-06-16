@@ -14,9 +14,11 @@ model = models.KeyedVectors
 def get_word_in_static_embbedings(model_word2vec: models.KeyedVectors, words: List[str], save_path: str):
     words_list = []
     vocab = list(model_word2vec.index_to_key)
+    print("vocab", vocab)
     embedding_dict = dict()
     all_words = "Word\tIn_Model\n"
     for one_word in tqdm(words, desc="Check which word are in the static embeddings"):
+        print(one_word)
         if one_word.lower() in vocab:
             all_words += f"{one_word.lower()}\tTrue\n"
             words_list.append(one_word.lower())

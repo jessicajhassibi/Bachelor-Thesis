@@ -1,1 +1,9 @@
+# run with pip install
 transformers
+pandas
+gensim
+sentence_transformers
+Wikipedia-API
+nltk
+top2vec
+bertopic

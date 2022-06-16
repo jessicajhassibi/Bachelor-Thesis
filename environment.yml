@@ -1,0 +1,19 @@
+name: jessica-thesis
+channels:
+  - conda-forge
+dependencies:
+  - python=3.9
+  - pandas
+  - numpy
+  - ipykernel
+  - nb_conda_kernels
+  - tensorflow
+  - jupyter
+  - transformers
+  - gensim
+  - sentence-transformers
+  - Wikipedia-API
+  - nltk
+  - top2vec
+  - bertopic
+

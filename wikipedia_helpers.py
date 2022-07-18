@@ -44,32 +44,42 @@ def extract_composers_texts(file):
                     if is_valid_composer:
                         i+=1
                         print("\nProcessing wikipedia pages of", page)
+                        # TODO: add text columns
                         pages_texts_dict[i] = {"de_title": "",
-                                                  "de_texts": "",
-                                                  "en_title": "",
-                                                  "en_texts": "",
-                                                  "ar_title": "",
-                                                  "ar_texts": "",
-                                                  "fr_title": "",
-                                                  "fr_texts": "",
-                                                  "it_title": "",
-                                                  "it_texts": "",
-                                                  "es_title": "",
-                                                  "es_texts": "",
-                                                  }
+                                               "en_title": "",
+                                               "ar_title": "",
+                                               "fr_title": "",
+                                               "it_title": "",
+                                               "es_title": "",
+                                               "de_paragraphs": "",
+                                               "en_paragraphs": "",
+                                               "ar_paragraphs": "",
+                                               "fr_paragraphs": "",
+                                               "it_paragraphs": "",
+                                               "es_paragraphs": "",
+                                               "de_categories": "",
+                                               "en_categories": "",
+                                               "ar_categories": "",
+                                               "fr_categories": "",
+                                               "it_categories": "",
+                                               "es_categories": "",
+                                                }
                         linked_page = wiki_page
                         # get all languages:
                         # print(composer_wiki_page.langlinks)
                         languages = ["de", "en", "ar", "fr", "it", "es"]
                         for lang in languages:
                             key_title = lang + "_title"
-                            key_text = lang + "_text"
+                            key_text = lang + "_texts"
+                            key_categories = lang + "_categories"
                             try:
                                 if lang != "de":
                                     # get wiki article of composer in foreign language
                                     linked_page = wiki_page.langlinks[lang]
                                 page_lang = linked_page.title
                                 pages_texts_dict[i][key_title] = page_lang
+                                pages_texts_dict[i][key_categories] = linked_page.categories.keys()
+                                print("Kategorien:", linked_page.categories.keys())
 
                                 # Run this code to set each paragraph as a document
                                 page_sections = linked_page.sections
@@ -95,8 +105,10 @@ def extract_composers_texts(file):
                                 print(lang, "article not existing.")
                                 pages_texts_dict[i][key_title] = ""
                                 pages_texts_dict[i][key_text] = ""
+                                pages_texts_dict[i][key_categories] = ""
                 except Exception as err:
                     print("Except")
+                break
             json.dump(pages_texts_dict, json_file, indent=4, ensure_ascii=False, separators=(",", ": "))
         print(len(pages_texts_dict), "of", len(linked_pages),
               "links in wikipedia liste are valid composers.")

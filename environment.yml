@@ -1,19 +1,20 @@
-name: jessica-thesis
-channels:
-  - conda-forge
+# run: conda env create --file environment.yml
+name: thesis
 dependencies:
   - python=3.9
+  - anaconda
   - pandas
   - numpy
   - ipykernel
   - nb_conda_kernels
-  - tensorflow
   - jupyter
   - transformers
-  - gensim
-  - sentence-transformers
-  - Wikipedia-API
-  - nltk
-  - top2vec
-  - bertopic
+  - pip
+  - pip:
+      - sentence-transformers
+      - bertopic
+      - Wikipedia-API
+      - top2vec
+      - gensim
+      - nltk
 

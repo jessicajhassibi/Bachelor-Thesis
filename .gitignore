@@ -1,9 +1,9 @@
 .idea
 .ipynb_checkpoints
 .DS_Store
-word2vec_multilingual.model
-BERTopic_model_multilingual
+models/word2vec_multilingual.model
+models/BERTopic_model_multilingual
 data/komponisten_texte.json
-word2vec_kv_models
-Top2Vec_model
-vectors.kv
+models/word2vec_kv_models
+models/Top2Vec_model
+models/word2vec_kv_models/vectors.kv

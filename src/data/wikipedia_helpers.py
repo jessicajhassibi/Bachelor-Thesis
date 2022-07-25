@@ -111,5 +111,5 @@ def extract_composers_texts(file):
                 break
             json.dump(pages_texts_dict, json_file, indent=4, ensure_ascii=False, separators=(",", ": "))
         print(len(pages_texts_dict), "of", len(linked_pages),
-              "links in wikipedia liste are valid composers.")
+              "links in wikipedia list used.")
         return pages_texts_dict

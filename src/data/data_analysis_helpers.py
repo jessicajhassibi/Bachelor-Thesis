@@ -1,3 +1,19 @@
+import WikiScraper
+import pandas as pd
+
+def get_composers_dataframe(path):
+    # create dictionary with composers as keys and \
+    # for each key a dictionary with the texts of the wikipedia articles \
+    # in the languages german, arabic, english, italian, french and spanish
+    if path == "":
+        data_dict = WikiScraper.extract_persecuted_composers_texts(path)
+    elif path == "":
+        data_dict = WikiScraper.extract_supported_composers_texts(path)
+    df = pd.read_json(path)
+    # transpose index and columns of df
+    df = df.transpose()
+    return df
+
 def text_counter(texts_array):
     """
     Counts how many articles, paragraphs and words in texts of texts_array exist.

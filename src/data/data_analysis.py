@@ -1,17 +1,19 @@
 import WikiScraper
 import pandas as pd
 
-def get_composers_dataframe(path):
-    # create dictionary with composers as keys and \
+# new instance of WikiScraper
+wiki_scraper = WikiScraper.WikiScraper()
+
+def get_composers_dataframe(pagename, langs):
+    # create pandas dataframe with composers as keys and \
     # for each key a dictionary with the texts of the wikipedia articles \
     # in the languages german, arabic, english, italian, french and spanish
-    if path == "":
-        data_dict = WikiScraper.extract_persecuted_composers_texts(path)
-    elif path == "":
-        data_dict = WikiScraper.extract_supported_composers_texts(path)
-    df = pd.read_json(path)
-    # transpose index and columns of df
-    df = df.transpose()
+    if pagename == "Liste der vom NS-Regime oder seinen Verbündeten verfolgten Komponisten":
+        df = wiki_scraper.extract_persecuted_composers_texts(langs)
+    elif pagename == "Gottbegnadeten-Liste":
+        df = wiki_scraper.extract_supported_composers_texts(langs)
+    else:
+        print("WikiScraper does not know how to read composers from given wikipedia page name.")
     return df
 
 def text_counter(texts_array):
@@ -33,11 +35,11 @@ def text_counter(texts_array):
     return(a, p, w)
 
 
-def language_analyzer(langs, langs_texts):
+def language_analyzer(langs, dataframe):
     """
     Creates nested dict of languages and their counts of articles, paragraphs, words and categories.
     :param langs:
-    :param langs_texts:
+    :param dataframe:
     :return:
     """
     # create dictionary
@@ -45,10 +47,11 @@ def language_analyzer(langs, langs_texts):
 
     #count_dict = dict.fromkeys(langs, language_dict)
 
+    langs_texts = []
     # get counts
     for lang in langs:
-        index = langs.index(lang)
-        texts = langs_texts[index]
+        col_name = f"{lang}_paragraphs"
+        texts = dataframe[col_name]
         counts = text_counter(texts)
         count_dict[lang] = {"articles": counts[0],
                             "paragraphs": counts[1],
@@ -64,3 +67,4 @@ def get_total_counts(count_dict):
         p += count_dict[lang]["paragraphs"]
         w += count_dict[lang]["words"]
     return (a, p, w)
+

@@ -1,19 +1,10 @@
 import WikiScraper
 import pandas as pd
 
-# new instance of WikiScraper
-wiki_scraper = WikiScraper.WikiScraper()
-
-def get_composers_dataframe(pagename, langs):
-    # create pandas dataframe with composers as keys and \
-    # for each key a dictionary with the texts of the wikipedia articles \
-    # in the languages german, arabic, english, italian, french and spanish
-    if pagename == "Liste der vom NS-Regime oder seinen Verbündeten verfolgten Komponisten":
-        df = wiki_scraper.extract_persecuted_composers_texts(langs)
-    elif pagename == "Gottbegnadeten-Liste":
-        df = wiki_scraper.extract_supported_composers_texts(langs)
-    else:
-        print("WikiScraper does not know how to read composers from given wikipedia page name.")
+def get_dataframe_from_path(file: str):
+    df = pd.read_json(file)
+    #transpose index and columns of df
+    df = df.transpose()
     return df
 
 def text_counter(texts_array):

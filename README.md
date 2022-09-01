@@ -25,5 +25,8 @@ conda deactivate && \
 conda env remove --name thesis
 ```
 
----
+### download pretrained word vectors
+We use the Glove vectors trained on Wikipedia 2014 and Gigaword 5.\
+[Get them from here](https://nlp.stanford.edu/projects/glove/) and place under data/models/word_vectors.
+
 

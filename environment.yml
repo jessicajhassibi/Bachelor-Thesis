@@ -10,11 +10,12 @@ dependencies:
   - jupyter
   - transformers
   - pip
-  - pip:
+  - pip3:
       - sentence-transformers
       - bertopic
       - Wikipedia-API
       - top2vec
       - gensim
       - nltk
+      - imblearn
 

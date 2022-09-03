@@ -1,7 +1,5 @@
 import json
 import os
-
-import pandas as pd
 import wikipediaapi
 import re
 
@@ -24,11 +22,6 @@ class WikiScraper:
                 json_file_text = json_file.read()
                 pages_texts_dict = json.loads(json_file_text)
         return pages_texts_dict
-
-    def print_categories(self, page):
-        categories = page.categories
-        for title in sorted(categories.keys()):
-            print("%s: %s" % (title, categories[title]))
 
     def clean_text(self, text):
         cleaned_text = re.sub('=+\s*.+\s*=+', '',
@@ -57,8 +50,7 @@ class WikiScraper:
                 for category in linked_page.categories.keys():  # extract categories related to page
                     page_categories.append(category)
                 # Run this code to set each paragraph as a document
-                page_documents = []
-                page_documents.append(linked_page.summary) # Summary of the page as one document
+                page_documents = [linked_page.summary]
                 for section in linked_page.sections:
                     cleaned_text = self.clean_text(section.text)
                     if cleaned_text != "":
@@ -94,7 +86,9 @@ class WikiScraper:
                 print("\nProcessing wikipedia pages in language: ", lang)
                 wiki_page = self.wiki_wiki.page("Liste der vom NS-Regime oder seinen Verbündeten verfolgten Komponisten")
                 linked_pages = [key for key in wiki_page.links.keys()] # TODO: nur Komponisten
-                # print_categories(wiki_page)
+                categories = wiki_page.categories
+                for title in sorted(categories.keys()):
+                    print("%s: %s" % (title, categories[title]))
                 with open(file, "w") as json_file:
                     pages_texts_dict = self.extract_texts(linked_pages, lang, "persecuted")
                     json.dump(pages_texts_dict, json_file, indent=4, ensure_ascii=False, separators=(",", ": "))

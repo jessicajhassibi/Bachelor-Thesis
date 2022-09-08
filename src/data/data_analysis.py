@@ -1,7 +1,8 @@
 import WikiScraper
 import pandas as pd
 
-def get_dataframe_from_path(file: str):
+
+def get_dataframe_from_json(file: str):
     df = pd.read_json(file)
     #transpose index and columns of df
     df = df.transpose()
@@ -26,27 +27,27 @@ def text_counter(texts_array):
     return(a, p, w)
 
 
-def language_analyzer(langs, dataframe):
+def language_analyzer(langs: str):
     """
     Creates nested dict of languages and their counts of articles, paragraphs, words and categories.
-    :param langs:
-    :param dataframe:
-    :return:
     """
     # create dictionary
     count_dict = dict()
 
-    #count_dict = dict.fromkeys(langs, language_dict)
-
-    langs_texts = []
     # get counts
     for lang in langs:
-        col_name = f"{lang}_paragraphs"
-        texts = dataframe[col_name]
-        counts = text_counter(texts)
-        count_dict[lang] = {"articles": counts[0],
-                            "paragraphs": counts[1],
-                            "words": counts[2]}
+        dfs = [get_dataframe_from_json(f"../data/persecuted_composers/{lang}_texts_composers_persecuted.json"),
+               get_dataframe_from_json(f"../data/supported_composers/{lang}_texts_composers_supported.json")]
+        a, p, w = 0, 0, 0
+        for df in dfs:
+            texts = df["paragraphs"]
+            counts = text_counter(texts)
+            a += counts[0]
+            p += counts[1]
+            w += counts[2]
+        count_dict[lang] = {"articles": a,
+                            "paragraphs": p,
+                            "words": w}
     return count_dict
 
 def get_total_counts(count_dict):

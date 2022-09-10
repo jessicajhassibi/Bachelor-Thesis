@@ -1,10 +1,7 @@
 import json
 import os
 import wikipediaapi
-import re
 
-
-# TODO: remove Werke, Einzelnachweise, Filmmusik, Weblinks und Literatur... bzw. nimm: "Leben" bzw. "Biographie"
 
 WIKI = wikipediaapi.Wikipedia(
     language="de",

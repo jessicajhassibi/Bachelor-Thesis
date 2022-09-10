@@ -7,3 +7,4 @@
 # search for models in first hierarchy only
 /models
 /reports
+/target

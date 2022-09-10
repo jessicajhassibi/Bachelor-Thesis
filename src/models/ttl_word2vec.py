@@ -1,10 +1,10 @@
-import numpy as np
-from typing import List, Dict, Any
-from tqdm import tqdm
-from gensim import models
 import json
-import gzip
 import os
+from typing import List
+
+import numpy as np
+from gensim import models
+from tqdm import tqdm
 
 model = models.KeyedVectors
 
@@ -45,7 +45,8 @@ def get_words_in_static_embeddings(kv_word2vec: models.KeyedVectors, words_list:
     with open(out_list_dir, "w", encoding="UTF-8") as json_file:
         json.dump(words_list, json_file)
     return missing_words
-        
+
+
 def load_word2vec_keyed_vectors(path):
     """
     load the model from a path

@@ -3,7 +3,7 @@
 # search everywhere - mac related
 **.DS_Store
 **__pycache__
-data
+/data
 # search for models in first hierarchy only
-./models
-reports
+/models
+/reports

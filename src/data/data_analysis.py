@@ -1,12 +1,5 @@
-import WikiScraper
-import pandas as pd
+import data_helpers
 
-
-def get_dataframe_from_json(file: str):
-    df = pd.read_json(file)
-    #transpose index and columns of df
-    df = df.transpose()
-    return df
 
 def text_counter(texts_array):
     """
@@ -17,14 +10,14 @@ def text_counter(texts_array):
     w = 0
     for text in texts_array.values:
         if text != "" and text != []:
-            a+=1
+            a += 1
             for paragraph in text:
-                p+=1
+                p += 1
 
                 # count words in paragraph
                 word_list = paragraph.split()
                 w += len(word_list)
-    return(a, p, w)
+    return a, p, w
 
 
 def language_analyzer(langs: str):
@@ -36,8 +29,8 @@ def language_analyzer(langs: str):
 
     # get counts
     for lang in langs:
-        dfs = [get_dataframe_from_json(f"../data/persecuted_composers/{lang}_texts_composers_persecuted.json"),
-               get_dataframe_from_json(f"../data/supported_composers/{lang}_texts_composers_supported.json")]
+        dfs = [data_helpers.get_dataframe_from_json(f"../data/persecuted_composers/{lang}_texts_composers_persecuted.json"),
+               data_helpers.get_dataframe_from_json(f"../data/supported_composers/{lang}_texts_composers_supported.json")]
         a, p, w = 0, 0, 0
         for df in dfs:
             texts = df["paragraphs"]
@@ -50,6 +43,7 @@ def language_analyzer(langs: str):
                             "words": w}
     return count_dict
 
+
 def get_total_counts(count_dict):
     a = 0
     p = 0
@@ -58,5 +52,5 @@ def get_total_counts(count_dict):
         a += count_dict[lang]["articles"]
         p += count_dict[lang]["paragraphs"]
         w += count_dict[lang]["words"]
-    return (a, p, w)
+    return a, p, w
 

@@ -1,4 +1,5 @@
 import data_helpers
+from data.data_helpers import get_persecuted_composers_path, get_supported_composers_path
 
 
 def text_counter(texts_array):
@@ -29,8 +30,11 @@ def language_analyzer(langs: str):
 
     # get counts
     for lang in langs:
-        dfs = [data_helpers.get_dataframe_from_json(f"../data/persecuted_composers/{lang}_texts_composers_persecuted.json"),
-               data_helpers.get_dataframe_from_json(f"../data/supported_composers/{lang}_texts_composers_supported.json")]
+        dfs = [data_helpers.get_dataframe_from_json(
+            str(get_persecuted_composers_path().joinpath(f"{lang}_texts_composers_persecuted.json"))),
+            data_helpers.get_dataframe_from_json(
+                str(get_supported_composers_path().joinpath(f"{lang}_texts_composers_supported.json")))]
+
         a, p, w = 0, 0, 0
         for df in dfs:
             texts = df["paragraphs"]
@@ -53,4 +57,3 @@ def get_total_counts(count_dict):
         p += count_dict[lang]["paragraphs"]
         w += count_dict[lang]["words"]
     return a, p, w
-

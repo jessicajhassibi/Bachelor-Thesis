@@ -1,7 +1,10 @@
 import json
 import os
+from pathlib import Path
+
 import wikipediaapi
 
+from data.data_helpers import get_data_target_path, get_persecuted_composers_path, get_supported_composers_path
 
 WIKI = wikipediaapi.Wikipedia(
     language="de",
@@ -60,8 +63,10 @@ def extract_texts(pagenames, lang: str, label: str):
 
 
 def extract_persecuted_composers_texts(langs):
+
+
     for lang in langs:
-        file = f"../data/persecuted_composers/{lang}_texts_composers_persecuted.json"
+        file = get_persecuted_composers_path().joinpath(f"{lang}_texts_composers_persecuted.json")
         if not check_exist(file):  # not True == dict empty == file does not exist
             print("\nProcessing wikipedia pages in language: ", lang)
             wiki_page = WIKI.page("Liste der vom NS-Regime oder seinen Verbündeten verfolgten Komponisten")
@@ -75,13 +80,15 @@ def extract_persecuted_composers_texts(langs):
 
 
 def extract_supported_composers_texts(langs):
+
+
     # Source "Gottbegnadeten-Liste" on Wikipedia
     supported_composers = ["Richard Strauss", "Hans Pfitzner", "Johann Nepomuk David", "Werner Egk",
                            "Gerhard Frommel", "Harald Genzmer", "Ottmar Gerster", "Kurt Hessenberg",
                            "Paul Höffer", "Karl Höller", "Mark Lothar", "Josef Marx", "Gottfried Müller",
                            "Carl Orff", "Ernst Pepping", "Max Trapp", "Fried Walter", "Hermann Zilcher"]
     for lang in langs:
-        file = f"../data/supported_composers/{lang}_texts_composers_supported.json"
+        file = get_supported_composers_path().joinpath(f"{lang}_texts_composers_supported.json")
         if not check_exist(file):  # not True == dict empty == file does not exist
             with open(file, "w") as json_file:
                 print("\nProcessing wikipedia pages in language: ", lang)

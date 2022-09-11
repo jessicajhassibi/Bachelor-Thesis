@@ -1,30 +1,66 @@
-import os
+from configparser import ConfigParser
 from pathlib import Path
 
 import pandas as pd
-import nlp
+
+from data import Group
 
 
-def get_data_target_path() -> Path:
-    target_folder: Path = Path("../target/data").resolve()
+def get_groups_ini_path() -> Path:
+    return Path('../groups.ini').resolve()
+
+
+def get_groups() -> (Group, Group):
+    # read data from groups.ini file
+    groups = ConfigParser()
+    groups.read(filenames=get_groups_ini_path(), encoding="ISO-8859-1")
+
+    # set up the two groups
+    group_0: Group = Group(label=groups["GROUP_0"]["LABEL"],
+                           wiki_page=groups["GROUP_0"]["WIKI_PAGE_WITH_LIST"],
+                           wiki_categories=groups["GROUP_0"]["WIKI_TARGET_CATEGORIES"].split(","),
+                           wiki_alternative_categories=groups["GROUP_0"]["WIKI_ALTERNATIVE_TARGET_CATEGORIES"].split(
+                               ","),
+                           wiki_main_language=groups["GROUP_0"]["WIKI_MAIN_LANGUAGE"],
+                           wiki_languages=groups["GROUP_0"]["WIKI_LANGUAGES"].split(","))
+
+    group_1: Group = Group(label=groups["GROUP_1"]["LABEL"],
+                           wiki_page=groups["GROUP_1"]["WIKI_PAGE_WITH_LIST"],
+                           wiki_categories=groups["GROUP_1"]["WIKI_TARGET_CATEGORIES"].split(","),
+                           wiki_alternative_categories=groups["GROUP_1"]["WIKI_ALTERNATIVE_TARGET_CATEGORIES"].split(
+                               ","),
+                           wiki_main_language=groups["GROUP_1"]["WIKI_MAIN_LANGUAGE"],
+                           wiki_languages=groups["GROUP_1"]["WIKI_LANGUAGES"].split(","))
+
+    return group_0, group_1
+
+
+def get_languages():
+    group_0, group_1 = get_groups()
+    # TODO why group:0 and not 1
+    return group_0.wiki_languages
+
+
+def get_target_path() -> Path:
+    target_folder: Path = Path("../target").resolve()
     target_folder.mkdir(parents=True, exist_ok=True)
     return target_folder
 
 
-def get_supported_composers_path() -> Path:
-    supported_composers_folder: Path = get_data_target_path().joinpath("supported_composers")
-    supported_composers_folder.mkdir(exist_ok=True)
-    return supported_composers_folder
+def get_groups_target_path() -> Path:
+    target_folder: Path = get_target_path().joinpath("groups").resolve()
+    target_folder.mkdir(parents=True, exist_ok=True)
+    return target_folder
 
 
-def get_persecuted_composers_path() -> Path:
-    persecuted_composers_folder: Path = get_data_target_path().joinpath("persecuted_composers")
-    persecuted_composers_folder.mkdir(exist_ok=True)
-    return persecuted_composers_folder
+def get_json_target_path(wiki_page, label, lang) -> Path:
+    target_folder: Path = get_groups_target_path().joinpath(label)
+    target_folder.mkdir(exist_ok=True)
+    return target_folder.joinpath(f"{lang}_{wiki_page.replace(' ', '_')}.json").resolve()
 
 
 def get_dataframes_path() -> Path:
-    dataframes_folder: Path = get_data_target_path().joinpath('dataframes')
+    dataframes_folder: Path = get_target_path().joinpath('dataframes')
     dataframes_folder.mkdir(parents=True, exist_ok=True)
     return dataframes_folder
 
@@ -54,31 +90,3 @@ def get_documents_list(languages):
         text_list = lang_df["text"].values.tolist()
         documents = documents + text_list
     return documents
-
-
-def create_dataframes(langs: list):
-    get_data_target_path().joinpath('dataframes').mkdir(exist_ok=True)
-    for lang in langs:
-        df_supported = get_dataframe_from_json(
-            str(get_supported_composers_path().joinpath(f"{lang}_texts_composers_supported.json")))
-        df_persecuted = get_dataframe_from_json(str(get_persecuted_composers_path().joinpath(
-            f"{lang}_texts_composers_persecuted.json")))
-        # create train dataframe using texts and labels
-        combined_df = pd.DataFrame()
-        combined_df["text"] = pd.concat([df_supported["text"], df_persecuted["text"]], ignore_index=True)
-        combined_df["label"] = pd.concat([df_supported["label"], df_persecuted["label"]], ignore_index=True)
-        combined_df.to_csv(get_dataframes_path().joinpath(f'{lang}_df.csv'))
-
-
-# TODO: geburtsdaten cleanen
-# create new dataframes with cleaned text
-def create_cleaned_dataframes(langs: list):
-    for lang in langs:
-        df_cleaned = pd.read_csv(get_dataframes_path().joinpath(f"{lang}_df.csv"))
-        df_cleaned.insert(1, "cleaned_text", df_cleaned["text"].apply(lambda x: nlp.clean_texts(x, "english")))
-        df_cleaned.drop(labels="text", axis="columns", inplace=True)
-        df_cleaned.drop(labels="Unnamed: 0", axis="columns", inplace=True)
-        # Encoding the label column
-        df_cleaned['label'] = df_cleaned['label'].map({'supported': 1, 'persecuted': 0})
-        # save cleaned dataframe
-        df_cleaned.to_csv(get_cleaned_dataframes_path().joinpath(f'{lang}_df_cleaned.csv'))

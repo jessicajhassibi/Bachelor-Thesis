@@ -1,108 +1,123 @@
 import json
-import os
 from pathlib import Path
 
 import wikipediaapi
 
-from data.data_helpers import get_data_target_path, get_persecuted_composers_path, get_supported_composers_path
-
-WIKI = wikipediaapi.Wikipedia(
-    language="de",
-    extract_format=wikipediaapi.ExtractFormat.WIKI
-)
+from .data_helpers import get_groups, get_json_target_path
+from .models import Group
 
 
-def check_exist(file):
-    # check if file exists
-    pages_texts_dict = {}
-    if os.path.isfile(file):
-        print(f"Texts have already been scraped to: {file}")
-        with open(file, "r", encoding="utf-8") as json_file:
-            json_file_text = json_file.read()
-            pages_texts_dict = json.loads(json_file_text)
-    return pages_texts_dict
+def scrape_and_generate_data():
+    print("Collecting groups...")
+    group_0, group_1 = get_groups()
+    _scrape_page_with_list(group_0)
+    _scrape_page_with_list(group_1)
+    print("")
+    print("")
+    print("----------------------------------")
+    print("FINISHED WIKIPEDIA SCRAPING!")
+    print("----------------------------------")
+    print("")
+    print("")
 
 
-def extract_texts(pagenames, lang: str, label: str):
-    pages_texts_dict: dict = {}
-    i = 0
-    for page in pagenames:
-        try:
-            wiki_page = WIKI.page(page)
-            i += 1
-            print("Processing page of", page)
-            if lang != "de":
-                # get wiki article of composer in foreign language
-                linked_page = wiki_page.langlinks[lang]
-            else:
-                linked_page = wiki_page
+def _scrape_page_with_list(group: Group):
+    wiki_api = wikipediaapi.Wikipedia(
+        language=group.wiki_main_language,
+        extract_format=wikipediaapi.ExtractFormat.WIKI
+    )
+    print("\nProcessing wikipedia page: {} \nin language: {}".format(group.wiki_page, group.wiki_main_language))
+    wiki_page = wiki_api.page(group.wiki_page)
 
-            page_lang = linked_page.title  # name of page in certain language
-            page_categories = []
-            for category in linked_page.categories.keys():  # extract categories related to page
-                page_categories.append(category)
-            text = linked_page.summary
-            if text != "":
-                # create new dict for composer page
-                row_dict: dict = {}
-                pages_texts_dict[i] = row_dict
+    print(f"Collecting sub-pages that contains {'or'.join(group.wiki_categories)} categories only...")
+    # collect pages name if it refers to one of the defined categories only.
+    filtered_pages: list = []
+    for page in wiki_page.links.keys():
+        sub_page = wiki_api.page(page)
+        if not sub_page.exists():
+            print(f"IGNORED: {sub_page.title} PAGE DOESN'T EXIST...")
+        elif not _matches_defined_categories(group.wiki_categories, group.wiki_alternative_categories,
+                                             sub_page.categories.keys(), sub_page.summary):
+            print(f"IGNORED: {sub_page.title} CATEGORIES DIDN'T MATCH...")
+        else:
+            print(f"FOUND: {sub_page.title} is {'or'.join(group.wiki_categories)}")
+            filtered_pages.append(page)
 
-                # dictionary keys definitions
-                key_title = "title"
-                key_text = "text"
-                key_categories = "categories"
-                key_label = "label"
-
-                pages_texts_dict[i][key_title] = page_lang
-                pages_texts_dict[i][key_text] = text
-                pages_texts_dict[i][key_categories] = page_categories
-                row_dict[key_label] = label
-        except KeyError:
-            print(f"article for {page} not existing in language {lang}\n    ")
-    return pages_texts_dict
+    _scrape_pages(filtered_pages, group)
 
 
-def extract_persecuted_composers_texts(langs):
+def _scrape_pages(pages_name: list, group: Group):
+    print("")
+    print("")
+    print("-----------------------------------------------------")
+    print(f"Scraping filtered list of pages for {group.label}...")
+    print("-----------------------------------------------------")
+    print("")
+    print("")
+
+    for lang in group.wiki_languages:
+        json_path: Path = get_json_target_path(group.wiki_page, group.label, lang)
+        if not json_path.exists():  # not True == dict empty == file does not exist
+            pages_data_dict: dict = {}
+            i = 1
+            for page_name in pages_name:
+                wiki_api = wikipediaapi.Wikipedia(
+                    language=lang,
+                    extract_format=wikipediaapi.ExtractFormat.WIKI
+                )
+                wiki_page = wiki_api.page(page_name)
+
+                print("Processing page: {} \nin language: {}".format(page_name, lang))
+                # page language is predefined in wiki_api object
+
+                # ------ creating new json dict ------
+                # first get the page title
+                json_dict: dict = {"title": page_name}
+                # then page summary
+                text = wiki_page.summary
+                if not text:
+                    # if empty page then skip
+                    continue
+                json_dict["text"] = text
+                # then categories
+                page_categories = []
+                for category in wiki_page.categories.keys():  # extract categories related to page
+                    page_categories.append(category)
+                json_dict["categories"] = page_categories
+                # then labels
+                json_dict["label"] = group.label
+                # ------ and finally append it -------
+                pages_data_dict[i] = json_dict
+
+                # increment for next element
+                i += 1
+            # dump the collected data into target folder
+            _dump_data(json_path, pages_data_dict)
+        else:
+            print(f"\nPage was already scraped under: {json_path}")
 
 
-    for lang in langs:
-        file = get_persecuted_composers_path().joinpath(f"{lang}_texts_composers_persecuted.json")
-        if not check_exist(file):  # not True == dict empty == file does not exist
-            print("\nProcessing wikipedia pages in language: ", lang)
-            wiki_page = WIKI.page("Liste der vom NS-Regime oder seinen Verbündeten verfolgten Komponisten")
-            linked_pages = [key for key in wiki_page.links.keys()]  # TODO: nur Komponisten
-            categories = wiki_page.categories
-            #for title in sorted(categories.keys()):
-            #    print("%s: %s" % (title, categories[title]))
-            with open(file, "w") as json_file:
-                pages_texts_dict = extract_texts(linked_pages, lang, "persecuted")
-                json.dump(pages_texts_dict, json_file, indent=4, ensure_ascii=False, separators=(",", ": "))
+def _dump_data(json_path: Path, pages_data_dict):
+    with open(json_path, "w") as json_file:
+        print("Dumping data into:", json_path)
+        json.dump(pages_data_dict, json_file, indent=4, ensure_ascii=False, separators=(",", ": "))
 
 
-def extract_supported_composers_texts(langs):
+def _matches_defined_categories(defined_categories, defined_alternative_categories, page_categories, page_summary):
+    # if one of the defined categories are found in the subpages categories then use it
+    # First case
+    for defined_category in defined_categories:
+        for page_category in page_categories:
+            if defined_category.lower() in page_category.lower():
+                return True
 
+    # Second case
+    for defined_category in defined_categories:
+        if defined_category.lower() in page_summary.lower():
+            for alt_category in defined_alternative_categories:
+                for page_category in page_categories:
+                    if alt_category.lower() in page_category.lower():
+                        return True
 
-    # Source "Gottbegnadeten-Liste" on Wikipedia
-    supported_composers = ["Richard Strauss", "Hans Pfitzner", "Johann Nepomuk David", "Werner Egk",
-                           "Gerhard Frommel", "Harald Genzmer", "Ottmar Gerster", "Kurt Hessenberg",
-                           "Paul Höffer", "Karl Höller", "Mark Lothar", "Josef Marx", "Gottfried Müller",
-                           "Carl Orff", "Ernst Pepping", "Max Trapp", "Fried Walter", "Hermann Zilcher"]
-    for lang in langs:
-        file = get_supported_composers_path().joinpath(f"{lang}_texts_composers_supported.json")
-        if not check_exist(file):  # not True == dict empty == file does not exist
-            with open(file, "w") as json_file:
-                print("\nProcessing wikipedia pages in language: ", lang)
-                pages_texts_dict = extract_texts(supported_composers, lang, "supported")
-                json.dump(pages_texts_dict, json_file, indent=4, ensure_ascii=False, separators=(",", ": "))
-
-
-def scrape_pages_multiple_languages(pagename, langs):
-    # create pandas dataframe with composers as keys and \
-    # for each key a dictionary with the texts of the wikipedia articles \
-    # in the languages german, arabic, english, italian, french and spanish
-    if pagename == "Liste der vom NS-Regime oder seinen Verbündeten verfolgten Komponisten":
-        extract_persecuted_composers_texts(langs)
-    elif pagename == "Gottbegnadeten-Liste":
-        extract_supported_composers_texts(langs)
-    else:
-        raise "WikiScraper does not know how to read composers from given wikipedia page name."
+    # else ignore this subpage/link
+    return False

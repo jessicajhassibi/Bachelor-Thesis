@@ -1,5 +1,5 @@
 import data_helpers
-from data.data_helpers import get_persecuted_composers_path, get_supported_composers_path
+from data.data_helpers import get_groups, get_languages
 
 
 def text_counter(texts_array):
@@ -21,15 +21,17 @@ def text_counter(texts_array):
     return a, p, w
 
 
-def language_analyzer(langs: str):
+def language_analyzer():
     """
     Creates nested dict of languages and their counts of articles, paragraphs, words and categories.
     """
     # create dictionary
     count_dict = dict()
 
+    group_0, group_1 = get_groups()
+
     # get counts
-    for lang in langs:
+    for lang in get_languages():
         dfs = [data_helpers.get_dataframe_from_json(
             str(get_persecuted_composers_path().joinpath(f"{lang}_texts_composers_persecuted.json"))),
             data_helpers.get_dataframe_from_json(
@@ -45,6 +47,8 @@ def language_analyzer(langs: str):
         count_dict[lang] = {"articles": a,
                             "paragraphs": p,
                             "words": w}
+
+    print("count_dict=", count_dict)
     return count_dict
 
 

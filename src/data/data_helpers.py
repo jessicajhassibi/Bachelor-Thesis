@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from data import Group
+from .models import Group
 
 
 def get_groups_ini_path() -> Path:

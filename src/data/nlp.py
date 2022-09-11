@@ -50,8 +50,8 @@ def get_stop_words(langs: list) -> list:
     return stop_words
 
 
-def create_dataframes(langs: list):
-    for lang in langs:
+def create_dataframes():
+    for lang in data_helpers.get_languages():
         group_0, group_1 = data_helpers.get_groups()
         df_group_0 = data_helpers.get_dataframe_from_json(
             str(data_helpers.get_json_target_path(group_0.wiki_page, group_0.label, lang)))
@@ -67,8 +67,8 @@ def create_dataframes(langs: list):
 
 # TODO: geburtsdaten cleanen
 # create new dataframes with cleaned text
-def create_cleaned_dataframes(langs: list):
-    for lang in langs:
+def create_cleaned_dataframes():
+    for lang in data_helpers.get_languages():
         df_cleaned = pd.read_csv(data_helpers.get_dataframes_path().joinpath(f"{lang}_df.csv"))
         df_cleaned.insert(1, "cleaned_text", df_cleaned["text"].apply(lambda x: clean_texts(x, "english")))
         df_cleaned.drop(labels="text", axis="columns", inplace=True)

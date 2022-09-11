@@ -1,5 +1,4 @@
-import data_helpers
-from data.data_helpers import get_groups, get_languages
+from .data_helpers import get_groups, get_languages
 
 
 def text_counter(texts_array):

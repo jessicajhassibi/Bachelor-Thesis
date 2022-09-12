@@ -64,11 +64,21 @@ def get_dataframes_path() -> Path:
     dataframes_folder.mkdir(parents=True, exist_ok=True)
     return dataframes_folder
 
-
 def get_cleaned_dataframes_path() -> Path:
     cleaned_dataframes_folder: Path = get_dataframes_path().joinpath('cleaned')
     cleaned_dataframes_folder.mkdir(parents=True, exist_ok=True)
     return cleaned_dataframes_folder
+
+
+def get_models_path() -> Path:
+    models_path: Path = Path("../models").resolve()
+    models_path.mkdir(parents=True, exist_ok=True)
+    return models_path
+
+def get_topic_modeling_path():
+    topic_modeling_folder: Path = get_models_path().joinpath('topic_modeling')
+    topic_modeling_folder.mkdir(parents=True, exist_ok=True)
+    return topic_modeling_folder
 
 
 def get_full_language_word(lang):
@@ -83,9 +93,11 @@ def get_dataframe_from_json(file: str):
     return df
 
 
-def get_documents_list(languages):
+
+
+def get_documents_list():
     documents = list()
-    for lang in languages:
+    for lang in get_languages():
         lang_df = pd.read_csv(get_dataframes_path().joinpath(f"{lang}_df.csv").resolve())
         text_list = lang_df["text"].values.tolist()
         documents = documents + text_list

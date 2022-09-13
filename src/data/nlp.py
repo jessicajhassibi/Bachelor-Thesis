@@ -1,6 +1,7 @@
 import re
 
 import nltk
+import nltk
 import pandas as pd
 from nltk.corpus import stopwords
 from nltk.tokenize import sent_tokenize, word_tokenize
@@ -8,6 +9,7 @@ from nltk.tokenize import sent_tokenize, word_tokenize
 from data import data_helpers
 
 nltk.download('stopwords')
+nltk.download('punkt')
 
 
 # TODO: make it work for all langs
@@ -69,11 +71,16 @@ def create_dataframes():
 # create new dataframes with cleaned text
 def create_cleaned_dataframes():
     for lang in data_helpers.get_languages():
-        df_cleaned = pd.read_csv(data_helpers.get_dataframes_path().joinpath(f"{lang}_df.csv"))
-        df_cleaned.insert(1, "cleaned_text", df_cleaned["text"].apply(lambda x: clean_texts(x, "english")))
-        df_cleaned.drop(labels="text", axis="columns", inplace=True)
-        df_cleaned.drop(labels="Unnamed: 0", axis="columns", inplace=True)
-        # Encoding the label column
-        df_cleaned['label'] = df_cleaned['label'].map({'supported': 1, 'persecuted': 0})
-        # save cleaned dataframe
-        df_cleaned.to_csv(data_helpers.get_cleaned_dataframes_path().joinpath(f'{lang}_df_cleaned.csv'))
+        try:
+            group_0, group_1 = data_helpers.get_groups()
+            df_cleaned = pd.read_csv(data_helpers.get_dataframes_path().joinpath(f"{lang}_df.csv"))
+            cleaned_text = df_cleaned["text"].apply(lambda x: clean_texts(x, data_helpers.get_full_language_word(lang)))
+            df_cleaned.insert(1, "cleaned_text", cleaned_text)
+            df_cleaned.drop(labels="text", axis="columns", inplace=True)
+            df_cleaned.drop(labels="Unnamed: 0", axis="columns", inplace=True)
+            # Encoding the label column
+            df_cleaned['label'] = df_cleaned['label'].map({group_1.label: 1, group_0.label: 0})
+            # save cleaned dataframe
+            df_cleaned.to_csv(data_helpers.get_cleaned_dataframes_path().joinpath(f'{lang}_df_cleaned.csv'))
+        except:
+            print("failed with language ", lang)

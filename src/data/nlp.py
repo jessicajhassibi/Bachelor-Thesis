@@ -39,12 +39,12 @@ def is_stop_word(word, lang):
         return False
 
 
-def get_stop_words(langs: list) -> list:
+def get_stop_words() -> list:
     """
     merges stopwords for each language
     """
     stop_words = list()
-    for lang in langs:
+    for lang in data_helpers.get_languages():
         lang = data_helpers.get_full_language_word(lang)
         stop_words = stop_words + stopwords.words(lang)
     return stop_words

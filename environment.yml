@@ -9,6 +9,7 @@ dependencies:
   - nb_conda_kernels
   - jupyter
   - transformers
+  - spacy
   - pip
   - pip:
       - sentence-transformers

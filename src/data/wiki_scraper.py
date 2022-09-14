@@ -3,7 +3,8 @@ from pathlib import Path
 
 import wikipediaapi
 
-from .data_helpers import get_groups, get_json_target_path
+from .path_helpers import get_json_target_path
+from .data_helpers import get_groups
 from .models import Group
 
 

@@ -6,6 +6,15 @@ from nltk.corpus import stopwords
 from .data_helpers import get_full_language_word, get_languages, get_groups, get_dataframe_from_json
 from .path_helpers import get_cleaned_dataframes_path, get_dataframes_path, get_json_target_path
 
+# python -m spacy download 'xx_ent_wiki_sm'
+# instantiating multiple languages pipeline package
+# TODO: try with large model
+nlp = spacy.load('xx_ent_wiki_sm')
+print("SpaCy pipeline loaded")
+# Adding the 'sentencizer component to the pipeline
+nlp.add_pipe('sentencizer')
+import re
+
 
 # TODO: make it work for all langs -> switch to spacy -> trained on 73 other languages
 # TODO: numbers/years  as stop words?
@@ -13,17 +22,21 @@ def clean_texts(text, lang="en"):
     """
     Cleans data by applying tokenization, removal of stop words
     """
+    text = re.sub("(\[.*\])", "", text) # remove phonetic spelling like [ˈbeːlɒ:ˈbɒrtoːk']
     tokens = list()
-    # instantiating module in correct language
-    nlp = spacy.load(lang)
-    # create pipeline 'sentencizer' component
-    sen = nlp.create_pipe('sentencizer')
-    # Adding the component to the pipeline
-    nlp.add_pipe(sen)
     doc = nlp(text)
-    for sent in doc.sents:
-        token = [token.lemma_ for token in sent if not is_stop_word(token, lang)]
-        tokens.append(token)
+    punctuation_marks = [",", ".", ";", ":", "-", "–", '"', "/", '""', "''" "'", "(", ")", "[", "]", "!", "?", "=", "{",
+                         "}", "&", '*', '†']
+    for sent in list(doc.sents):
+        for token in sent:
+            #print(token, token.lemma_)
+            token = str(token)
+            if is_stop_word(token, lang):
+                continue
+            elif token in punctuation_marks:
+                continue
+            else:
+                tokens.append(token)
     return tokens
 
 
@@ -65,19 +78,16 @@ def create_dataframes():
 
 
 # TODO: geburtsdaten cleanen
-# create new dataframes with cleaned text
 def create_cleaned_dataframes():
     for lang in get_languages():
-        try:
-            group_0, group_1 = get_groups()
-            df_cleaned = pd.read_csv(get_dataframes_path().joinpath(f"{lang}_df.csv"))
-            cleaned_text = df_cleaned["text"].apply(lambda x: clean_texts(x, lang))
-            df_cleaned.insert(1, "cleaned_text", cleaned_text)
-            df_cleaned.drop(labels="text", axis="columns", inplace=True)
-            df_cleaned.drop(labels="Unnamed: 0", axis="columns", inplace=True)
-            # Encoding the label column
-            df_cleaned['label'] = df_cleaned['label'].map({group_1.label: 1, group_0.label: 0})
-            # save cleaned dataframe
-            df_cleaned.to_csv(get_cleaned_dataframes_path().joinpath(f'{lang}_df_cleaned.csv'))
-        except:
-            print("failed with language ", lang)
+        group_0, group_1 = get_groups()
+        df_cleaned = pd.read_csv(get_dataframes_path().joinpath(f"{lang}_df.csv"))
+        print(f"Cleaning texts in language {lang}")
+        cleaned_text = df_cleaned["text"].apply(lambda x: clean_texts(x, lang))
+        df_cleaned.insert(1, "cleaned_text", cleaned_text)
+        df_cleaned.drop(labels="text", axis="columns", inplace=True)
+        df_cleaned.drop(labels="Unnamed: 0", axis="columns", inplace=True)
+        # Encoding the label column
+        df_cleaned['label'] = df_cleaned['label'].map({group_1.label: 1, group_0.label: 0})
+        # save cleaned dataframe
+        df_cleaned.to_csv(get_cleaned_dataframes_path().joinpath(f'{lang}_df_cleaned.csv'))

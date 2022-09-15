@@ -1,6 +1,7 @@
 # run: conda env create --file environment.yml
 name: thesis
 channels:
+  - defaults
   - conda-forge
 dependencies:
   - python=3.9

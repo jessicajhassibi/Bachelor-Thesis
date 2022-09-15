@@ -2,7 +2,7 @@ from configparser import ConfigParser
 
 import pandas as pd
 from .models import Group
-from .path_helpers import get_groups_ini_path
+from .path_helpers import get_groups_ini_path, get_dataframes_path
 
 
 def get_groups() -> (Group, Group):
@@ -51,7 +51,16 @@ def get_dataframe_from_json(file: str):
 def get_documents_list():
     documents = list()
     for lang in get_languages():
-        lang_df = pd.read_csv(path_helpers.get_dataframes_path().joinpath(f"{lang}_df.csv").resolve())
+        lang_df = pd.read_csv(get_dataframes_path().joinpath(f"{lang}_df.csv").resolve())
         text_list = lang_df["text"].values.tolist()
+        documents = documents + text_list
+    return documents
+
+
+def get_cleaned_documents_list():
+    documents = list()
+    for lang in get_languages():
+        lang_df = pd.read_csv(get_dataframes_path().joinpath(f"cleaned/{lang}_df_cleaned.csv").resolve())
+        text_list = lang_df["cleaned_text"].values.tolist()
         documents = documents + text_list
     return documents

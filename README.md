@@ -25,6 +25,12 @@ conda deactivate && \
 conda env remove --name thesis
 ```
 
+### required for spacy:
+``` shell
+export  KMP_DUPLICATE_LIB_OK=TRUE  
+python -m spacy download 'xx_ent_wiki_sm'
+```
+
 ### download pretrained word vectors
 
 We use the Glove vectors trained on Wikipedia 2014 and Gigaword 5.\

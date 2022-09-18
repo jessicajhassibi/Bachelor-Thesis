@@ -64,3 +64,24 @@ def get_cleaned_documents_list():
         text_list = lang_df["cleaned_text"].values.tolist()
         documents = documents + text_list
     return documents
+
+
+def get_cleaned_dataframes():
+    lang_dfs_list = []
+    for lang in get_languages():
+        lang_df = pd.read_csv(get_dataframes_path().joinpath(f"cleaned/{lang}_df_cleaned.csv").resolve(),
+                              converters={'cleaned_text': lambda x: x[1:-1].split(',')})
+        lang_dfs_list.append(lang_df)
+    df = pd.concat(lang_dfs_list)
+    df.drop(labels="Unnamed: 0", axis="columns", inplace=True)
+    return df
+
+
+def get_dataframes():
+    lang_dfs_list = []
+    for lang in get_languages():
+        lang_df = pd.read_csv(get_dataframes_path().joinpath(f"{lang}_df.csv").resolve(), converters={'cleaned_text': pd.eval})
+        lang_dfs_list.append(lang_df)
+    df = pd.concat(lang_dfs_list)
+    df.drop(labels="Unnamed: 0", axis="columns", inplace=True)
+    return df

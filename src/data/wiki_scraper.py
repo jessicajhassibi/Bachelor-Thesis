@@ -30,7 +30,7 @@ def _scrape_page_with_list(group: Group):
     print("\nProcessing wikipedia page: {} \nin language: {}".format(group.wiki_page, group.wiki_main_language))
     wiki_page = wiki_api.page(group.wiki_page)
 
-    print(f"Collecting sub-pages that contains {'or'.join(group.wiki_categories)} categories only...")
+    print(f"Collecting sub-pages that contain {'or'.join(group.wiki_categories)} categories only...")
     # collect pages name if it refers to one of the defined categories only.
     filtered_pages: list = []
     for page in wiki_page.links.keys():

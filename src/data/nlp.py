@@ -1,10 +1,11 @@
-import re
-
 import pandas as pd
+import os
 import spacy
+import re
 from nltk.corpus import stopwords
 from .data_helpers import get_full_language_word, get_languages, get_groups, get_dataframe_from_json
 from .path_helpers import get_cleaned_dataframes_path, get_dataframes_path, get_json_target_path
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 # python -m spacy download 'xx_ent_wiki_sm'
 # instantiating multiple languages pipeline package
@@ -13,23 +14,21 @@ nlp = spacy.load('xx_ent_wiki_sm')
 print("SpaCy pipeline loaded")
 # Adding the 'sentencizer component to the pipeline
 nlp.add_pipe('sentencizer')
-import re
 
 
-# TODO: make it work for all langs -> switch to spacy -> trained on 73 other languages
 # TODO: numbers/years  as stop words?
 def clean_texts(text, lang="en"):
     """
     Cleans data by applying tokenization, removal of stop words
     """
-    text = re.sub("(\[.*\])", "", text) # remove phonetic spelling like [ˈbeːlɒ:ˈbɒrtoːk']
+    text = re.sub("(\[.*\])", "", text)  # remove phonetic spelling like [ˈbeːlɒ:ˈbɒrtoːk']
     tokens = list()
     doc = nlp(text)
     punctuation_marks = [",", ".", ";", ":", "-", "–", '"', "/", '""', "''" "'", "(", ")", "[", "]", "!", "?", "=", "{",
                          "}", "&", '*', '†']
     for sent in list(doc.sents):
         for token in sent:
-            #print(token, token.lemma_)
+            # print(token, token.lemma)
             token = str(token)
             if is_stop_word(token, lang):
                 continue
@@ -45,7 +44,7 @@ def is_stop_word(word, lang):
     sw.append("isbn")
     if word in sw:
         return True
-    #elif re.match(r"\d+", word):  # e.g. "1" or "20" but not a year (1994) as it may contain historical information:
+    # elif re.match(r"\d+", word):  # e.g. "1" or "20" but not a year (1994) as it may contain historical information:
     #    return True  # TODO: but years gone?!
     else:
         return False
@@ -69,7 +68,6 @@ def create_dataframes():
             str(get_json_target_path(group_0.wiki_page, group_0.label, lang)))
         df_group_1 = get_dataframe_from_json(
             str(get_json_target_path(group_1.wiki_page, group_1.label, lang)))
-
         # create train dataframe using texts and labels
         combined_df = pd.DataFrame()
         combined_df["text"] = pd.concat([df_group_0["text"], df_group_1["text"]], ignore_index=True)
@@ -77,7 +75,6 @@ def create_dataframes():
         combined_df.to_csv(get_dataframes_path().joinpath(f'{lang}_df.csv'))
 
 
-# TODO: geburtsdaten cleanen
 def create_cleaned_dataframes():
     for lang in get_languages():
         group_0, group_1 = get_groups()

@@ -21,6 +21,14 @@ Given the labels created by the Nazis: \
 
 ## How-to's
 
+Run project by executing the jupyter notebooks in ascending order:
+* 0_data_scraping.ipynb
+* 1_data_analysis.ipynb
+* 2_data_preparation.ipynb
+* 3_topic_modeling.ipynb
+* 4_word2vec_text_classification.ipynb
+
+
 ### setup
 ``` shell
 conda env create --file environment.yml && \
@@ -44,7 +52,6 @@ conda env update
 conda deactivate && \
 conda env remove --name thesis
 ```
-
 
 ### download pretrained word vectors
 

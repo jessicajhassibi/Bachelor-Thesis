@@ -27,7 +27,6 @@ conda env remove --name thesis
 
 ### required for spacy:
 ``` shell
-export  KMP_DUPLICATE_LIB_OK=TRUE  
 python -m spacy download 'xx_ent_wiki_sm'
 ```
 

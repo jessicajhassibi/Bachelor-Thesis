@@ -69,8 +69,9 @@ def get_cleaned_documents_list():
 def get_cleaned_dataframes():
     lang_dfs_list = []
     for lang in get_languages():
+        # apply conversion to cleaned_text to avoid multiple quotation marks due to wrong pandas csv reading
         lang_df = pd.read_csv(get_dataframes_path().joinpath(f"cleaned/{lang}_df_cleaned.csv").resolve(),
-                              converters={'cleaned_text': lambda x: x[1:-1].split(',')})
+                              converters={'cleaned_text': lambda x: [word[1:-1] for word in x[1:-1].split(', ')]})
         lang_dfs_list.append(lang_df)
     df = pd.concat(lang_dfs_list)
     df.drop(labels="Unnamed: 0", axis="columns", inplace=True)
@@ -80,7 +81,8 @@ def get_cleaned_dataframes():
 def get_dataframes():
     lang_dfs_list = []
     for lang in get_languages():
-        lang_df = pd.read_csv(get_dataframes_path().joinpath(f"{lang}_df.csv").resolve(), converters={'cleaned_text': pd.eval})
+        lang_df = pd.read_csv(get_dataframes_path().joinpath(f"{lang}_df.csv").resolve(),
+                              converters={'cleaned_text': lambda x: x[1:-1].split(', ')})
         lang_dfs_list.append(lang_df)
     df = pd.concat(lang_dfs_list)
     df.drop(labels="Unnamed: 0", axis="columns", inplace=True)

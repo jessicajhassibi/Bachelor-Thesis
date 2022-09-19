@@ -38,7 +38,7 @@ def _scrape_page_with_list(group: Group):
         if not sub_page.exists():
             print(f"IGNORED: {sub_page.title} PAGE DOESN'T EXIST...")
         elif not _matches_defined_categories(group.wiki_categories, group.wiki_alternative_categories,
-                                             sub_page.categories.keys(), sub_page.summary):
+                                             sub_page.categories.keys(), sub_page.sections[0].text):
             print(f"IGNORED: {sub_page.title} CATEGORIES DIDN'T MATCH...")
         else:
             print(f"FOUND: {sub_page.title} is {'or'.join(group.wiki_categories)}")
@@ -74,24 +74,37 @@ def _scrape_pages(pages_name: list, group: Group):
                 # ------ creating new json dict ------
                 # first get the page title
                 json_dict: dict = {"title": page_name}
-                # then page summary
-                text = wiki_page.summary
-                if not text:
-                    # if empty page then skip
-                    continue
-                json_dict["text"] = text
-                # then categories
-                page_categories = []
-                for category in wiki_page.categories.keys():  # extract categories related to page
-                    page_categories.append(category)
-                json_dict["categories"] = page_categories
-                # then labels
-                json_dict["label"] = group.label
-                # ------ and finally append it -------
-                pages_data_dict[i] = json_dict
+                # then the text
+                # text consists of summary of page and text of the first section with 2 subsections of text
+                try:
+                    summary = wiki_page.summary
+                    paragraphs = list()
+                    paragraphs.append(wiki_page.summary)
+                    paragraphs.append(wiki_page.sections[0].text)
+                    for section in wiki_page.sections[0].sections:
+                        if section.text == "":
+                            for subsection in section.sections:
+                                paragraphs.append(subsection.text)
+                        else:
+                            paragraphs.append(section.text)
+                    json_dict["paragraphs"] = paragraphs
+                    text = ' '.join([p for p in paragraphs])
+                    json_dict["text"] = text
+                    # then categories
+                    page_categories = []
+                    for category in wiki_page.categories.keys():  # extract categories related to page
+                        page_categories.append(category)
+                    json_dict["categories"] = page_categories
+                    # then labels
+                    json_dict["label"] = group.label
+                    # ------ and finally append it -------
+                    pages_data_dict[i] = json_dict
 
-                # increment for next element
-                i += 1
+                    # increment for next element
+                    i += 1
+                except IndexError:
+                    # page is not existing in given language
+                    continue
             # dump the collected data into target folder
             _dump_data(json_path, pages_data_dict)
         else:
@@ -104,7 +117,7 @@ def _dump_data(json_path: Path, pages_data_dict):
         json.dump(pages_data_dict, json_file, indent=4, ensure_ascii=False, separators=(",", ": "))
 
 
-def _matches_defined_categories(defined_categories, defined_alternative_categories, page_categories, page_summary):
+def _matches_defined_categories(defined_categories, defined_alternative_categories, page_categories, page_content):
     # if one of the defined categories are found in the subpages categories then use it
     # First case
     for defined_category in defined_categories:
@@ -114,7 +127,7 @@ def _matches_defined_categories(defined_categories, defined_alternative_categori
 
     # Second case
     for defined_category in defined_categories:
-        if defined_category.lower() in page_summary.lower():
+        if defined_category.lower() in page_content.lower():
             for alt_category in defined_alternative_categories:
                 for page_category in page_categories:
                     if alt_category.lower() in page_category.lower():

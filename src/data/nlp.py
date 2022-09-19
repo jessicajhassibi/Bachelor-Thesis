@@ -17,26 +17,26 @@ nlp.add_pipe('sentencizer')
 
 
 # TODO: numbers/years  as stop words?
-def clean_texts(text, lang="en"):
+def clean_texts(text, lang="en") -> list():
     """
     Cleans data by applying tokenization, removal of stop words
     """
     text = re.sub("(\[.*\])", "", text)  # remove phonetic spelling like [ˈbeːlɒ:ˈbɒrtoːk']
-    tokens = list()
+    words = list()
     doc = nlp(text)
     punctuation_marks = [",", ".", ";", ":", "-", "–", '"', "/", '""', "''" "'", "(", ")", "[", "]", "!", "?", "=", "{",
                          "}", "&", '*', '†']
     for sent in list(doc.sents):
         for token in sent:
             # print(token, token.lemma)
-            token = str(token)
-            if is_stop_word(token, lang):
+            word = token.text
+            if is_stop_word(word, lang):
                 continue
-            elif token in punctuation_marks:
+            elif word in punctuation_marks:
                 continue
             else:
-                tokens.append(token)
-    return tokens
+                words.append(word)
+    return words
 
 
 def is_stop_word(word, lang):

@@ -14,6 +14,11 @@ python -m ipykernel install --user --name thesis --display-name "thesis kernel"
 
 ```
 
+#### required for spacy:
+``` shell
+python -m spacy download 'xx_ent_wiki_sm'
+```
+
 ### update dependencies
 ``` shell
 conda env update
@@ -25,10 +30,6 @@ conda deactivate && \
 conda env remove --name thesis
 ```
 
-### required for spacy:
-``` shell
-python -m spacy download 'xx_ent_wiki_sm'
-```
 
 ### download pretrained word vectors
 

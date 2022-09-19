@@ -1,10 +1,23 @@
 # bachelor-thesis
-Code for my bachelor's thesis.
 
-Performs an NLP analysis over wikipedia pages of persecuted composers in the period of National Socialism in germany.
+Code for my bachelor's thesis. 
+
+Performs NLP analysis and binary classification over the wikipedia articles of two wikipedia lists. \
+The code is generic! \
+You can suit it to your problem by changing the groups.ini file and placing your lists urls and the wiki categories you are looking for there. 
+
+My two lists/ classes are:
+- [Gottbegnateden-Liste](https://de.wikipedia.org/wiki/Gottbegnadeten-Liste)
+- [Liste der vom NS-Regime oder seinen Verbündeten verfolgten Komponisten](https://de.wikipedia.org/wiki/Liste_der_vom_NS-Regime_oder_seinen_Verb%C3%BCndeten_verfolgten_Komponisten)
+
+## Background
+
+In the period of National Socialism in Germany the Nazis basically classified composers into two groups:
+- "Gifted" Composers which they admired and supported 
+- "Degenerated" Composers which were persecuted or killed by them
 
 
-# How-to's
+## How-to's
 
 ### setup
 ``` shell
@@ -34,12 +47,6 @@ conda env remove --name thesis
 ### download pretrained word vectors
 
 We use the Glove vectors trained on Wikipedia 2014 and Gigaword 5.\
-[Get them from here](https://nlp.stanford.edu/projects/glove/) and place under data/models/word_vectors.
+[Get them here](https://nlp.stanford.edu/projects/glove/) and place to models/word_vectors.
 
-# Ideas
-
-- Use trained model to categorize a wiki list. For
-  example https://de.wikipedia.org/wiki/Kategorie:Komponist_(Deutschland)
-- write in BA: Überprüfen von Qualität d. Wikipedialiste durch check ob Kategorien passen (z.B. Arno Nadel kein
-  Komponist)
 

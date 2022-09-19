@@ -16,6 +16,7 @@ In the period of National Socialism in Germany the Nazis basically classified co
 - "Gifted" Composers which they admired and supported 
 - "Degenerated" Composers which were persecuted or killed by them
 
+<b>Can we train a Machine Learning model that is able to correctly classify a composer by his biography on wikipedia?</b>
 
 ## How-to's
 

@@ -38,8 +38,10 @@ python -m ipykernel install --user --name thesis --display-name "thesis kernel"
 ```
 
 #### required for spacy:
+Download Language models of languages you want to use.
 ``` shell
-python -m spacy download 'xx_ent_wiki_sm'
+export  KMP_DUPLICATE_LIB_OK=TRUE
+python -m spacy download 'de_core_news_sm' # german model
 ```
 
 ### update dependencies

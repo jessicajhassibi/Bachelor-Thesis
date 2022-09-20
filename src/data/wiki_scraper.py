@@ -77,14 +77,14 @@ def _scrape_pages(pages_name: list, group: Group):
                 # then the text
                 # text consists of summary of page and text of the first section with 2 subsections of text
                 try:
-                    summary = wiki_page.summary
                     paragraphs = list()
                     paragraphs.append(wiki_page.summary)
                     paragraphs.append(wiki_page.sections[0].text)
                     for section in wiki_page.sections[0].sections:
                         if section.text == "":
                             for subsection in section.sections:
-                                paragraphs.append(subsection.text)
+                                if subsection.text != "":
+                                    paragraphs.append(subsection.text)
                         else:
                             paragraphs.append(section.text)
                     json_dict["paragraphs"] = paragraphs

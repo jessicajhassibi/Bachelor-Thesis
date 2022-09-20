@@ -1,44 +1,9 @@
-from configparser import ConfigParser
-
 import pandas as pd
-from .models import Group
-from .path_helpers import get_groups_ini_path, get_dataframes_path
-
-
-def get_groups() -> (Group, Group):
-    # read data from groups.ini file
-    groups = ConfigParser()
-    groups.read(filenames= get_groups_ini_path(), encoding="ISO-8859-1")
-
-    # set up the two groups
-    group_0: Group = Group(label=groups["GROUP_0"]["LABEL"],
-                           wiki_page=groups["GROUP_0"]["WIKI_PAGE_WITH_LIST"],
-                           wiki_categories=groups["GROUP_0"]["WIKI_TARGET_CATEGORIES"].split(","),
-                           wiki_alternative_categories=groups["GROUP_0"]["WIKI_ALTERNATIVE_TARGET_CATEGORIES"].split(
-                               ","),
-                           wiki_main_language=groups["GROUP_0"]["WIKI_MAIN_LANGUAGE"],
-                           wiki_languages=groups["GROUP_0"]["WIKI_LANGUAGES"].split(","))
-
-    group_1: Group = Group(label=groups["GROUP_1"]["LABEL"],
-                           wiki_page=groups["GROUP_1"]["WIKI_PAGE_WITH_LIST"],
-                           wiki_categories=groups["GROUP_1"]["WIKI_TARGET_CATEGORIES"].split(","),
-                           wiki_alternative_categories=groups["GROUP_1"]["WIKI_ALTERNATIVE_TARGET_CATEGORIES"].split(
-                               ","),
-                           wiki_main_language=groups["GROUP_1"]["WIKI_MAIN_LANGUAGE"],
-                           wiki_languages=groups["GROUP_1"]["WIKI_LANGUAGES"].split(","))
-
-    return group_0, group_1
-
-
-def get_languages():
-    group_0, group_1 = get_groups()
-    # TODO why group:0 and not 1
-    return group_0.wiki_languages
-
-
-def get_full_language_word(lang):
-    langs_dict = {"en": "english", "de": "german", "es": "spanish", "ar": "arabic", "fr": "french", "it": "italian"}
-    return langs_dict[lang]
+from .path_helpers import get_dataframes_path, get_cleaned_dataframes_path
+from ast import literal_eval
+from .nlp import get_sentences, get_cleaned_sentences, clean_texts, clean_paragraphs
+from .path_helpers import get_cleaned_dataframes_path, get_dataframes_path, get_json_target_path
+from .config_helpers import get_groups, get_languages
 
 
 def get_dataframe_from_json(file: str):
@@ -48,21 +13,31 @@ def get_dataframe_from_json(file: str):
     return df
 
 
-def get_documents_list():
-    documents = list()
-    for lang in get_languages():
-        lang_df = pd.read_csv(get_dataframes_path().joinpath(f"{lang}_df.csv").resolve())
-        text_list = lang_df["text"].values.tolist()
-        documents = documents + text_list
-    return documents
-
-
-def get_cleaned_documents_list():
-    documents = list()
-    for lang in get_languages():
-        lang_df = pd.read_csv(get_dataframes_path().joinpath(f"cleaned/{lang}_df_cleaned.csv").resolve())
-        text_list = lang_df["cleaned_text"].values.tolist()
-        documents = documents + text_list
+def get_documents_list(text_type = 'paragraphs'):
+    """
+    Get list of documents.
+    Can be either 'texts', 'paragraphs' or 'sentences'
+    """
+    if text_type == 'paragraphs':
+        paragraphs_list = get_dataframes()['paragraphs'].values.tolist()
+        documents = [paragraph for paragraphs in paragraphs_list for paragraph in paragraphs]
+    elif text_type == 'cleaned_paragraphs':
+        paragraphs_list = get_cleaned_dataframes()['cleaned_paragraphs'].values.tolist()
+        documents = list()
+        for paragraphs in paragraphs_list:
+            for paragraph in paragraphs:
+                for words in paragraph:
+                    documents.append(words)
+    elif text_type == 'sentences':
+        texts_list = get_dataframes()['texts'].values.tolist()
+        documents = get_sentences(texts_list)
+    elif text_type == 'cleaned_sentences':
+        texts_list = get_dataframes()['texts'].values.tolist()
+        documents = get_cleaned_sentences(texts_list)
+    elif text_type == 'cleaned_text':  # full (raw/ cleaned) text of article chosen as text type
+        documents = get_cleaned_dataframes()['cleaned_texts'].values.tolist()
+    else:
+        documents = get_dataframes()['texts'].values.tolist()
     return documents
 
 
@@ -70,8 +45,9 @@ def get_cleaned_dataframes():
     lang_dfs_list = []
     for lang in get_languages():
         # apply conversion to cleaned_text to avoid multiple quotation marks due to wrong pandas csv reading
-        lang_df = pd.read_csv(get_dataframes_path().joinpath(f"cleaned/{lang}_df_cleaned.csv").resolve(),
-                              converters={'cleaned_text': lambda x: [word[1:-1] for word in x[1:-1].split(', ')]})
+        lang_df = pd.read_csv(get_cleaned_dataframes_path().joinpath(f"{lang}_df_cleaned.csv").resolve(),
+                              converters={'cleaned_texts': lambda x: literal_eval(x),
+                                          'cleaned_paragraphs': lambda x: literal_eval(x)})
         lang_dfs_list.append(lang_df)
     df = pd.concat(lang_dfs_list)
     df.drop(labels="Unnamed: 0", axis="columns", inplace=True)
@@ -82,8 +58,34 @@ def get_dataframes():
     lang_dfs_list = []
     for lang in get_languages():
         lang_df = pd.read_csv(get_dataframes_path().joinpath(f"{lang}_df.csv").resolve(),
-                              converters={'cleaned_text': lambda x: x[1:-1].split(', ')})
+                              converters={'paragraphs': lambda x: literal_eval(x)}) # TODO: paragraphs as list not str
         lang_dfs_list.append(lang_df)
     df = pd.concat(lang_dfs_list)
     df.drop(labels="Unnamed: 0", axis="columns", inplace=True)
     return df
+
+
+def create_dataframes():
+    for lang in get_languages():
+        group_0, group_1 = get_groups()
+        df_group_0 = get_dataframe_from_json(
+            str(get_json_target_path(group_0.wiki_page, group_0.label, lang)))
+        df_group_1 = get_dataframe_from_json(
+            str(get_json_target_path(group_1.wiki_page, group_1.label, lang)))
+
+
+        # create dataframe with both groups
+        df = pd.DataFrame()
+        df["paragraphs"] = pd.concat([df_group_0["paragraphs"], df_group_1["paragraphs"]], ignore_index=True)
+        df["texts"] = pd.concat([df_group_0["text"], df_group_1["text"]], ignore_index=True)
+        df["label"] = pd.concat([df_group_0["label"], df_group_1["label"]], ignore_index=True)
+        # Encoding the label column
+        df['label'] = df['label'].map({group_1.label: 1, group_0.label: 0})
+        df.to_csv(get_dataframes_path().joinpath(f'{lang}_df.csv'))
+
+        # create the same dataframe with cleaned texts
+        cleaned_df = pd.DataFrame()
+        cleaned_df["cleaned_paragraphs"] = df["paragraphs"].apply(lambda x: clean_paragraphs(x, lang))
+        cleaned_df["cleaned_texts"] = df["texts"].apply(lambda x: clean_texts(x, lang))
+        cleaned_df["label"] = df["label"]
+        cleaned_df.to_csv(get_cleaned_dataframes_path().joinpath(f'{lang}_df_cleaned.csv'))

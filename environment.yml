@@ -22,4 +22,5 @@ dependencies:
       - gensim
       - nltk
       - imblearn # pip3
+      - tensorflow tensorflow_hub tensorflow_text # TODO: if top2vec model works
 

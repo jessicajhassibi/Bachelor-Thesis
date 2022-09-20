@@ -1,9 +1,8 @@
-from configparser import ConfigParser
 from pathlib import Path
 
 
-def get_groups_ini_path() -> Path:
-    return Path('../groups.ini').resolve()
+def get_config_ini_path() -> Path:
+    return Path('../config.ini').resolve()
 
 
 def get_target_path() -> Path:

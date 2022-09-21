@@ -1,10 +1,8 @@
 from pathlib import Path
 from top2vec import Top2Vec
 from bertopic import BERTopic
-from data import get_documents_list, get_topic_modeling_path
-from data import get_top2vec_embedding_model
-from data import get_languages
-from data import get_full_language_word
+from data import get_documents_list, get_topic_modeling_path, get_top2vec_embedding_model, get_languages, \
+    get_full_language_word, get_stop_words
 from sklearn.feature_extraction.text import CountVectorizer
 
 
@@ -20,9 +18,9 @@ def get_top2vec_model(text_type: str) -> Top2Vec:
         top2vec_model = Top2Vec.load(top2vec_model_path)
     except Exception as err:
         print("Top2Vec model not found.")
-        print("Training new model...")
-        multilingual_documents = get_documents_list(text_type)
-        top2vec_model = Top2Vec(multilingual_documents, verbose=True, ngram_vocab=True,
+        documents = get_documents_list(text_type)
+        print(f"Training new model on {len(documents)} documents.")
+        top2vec_model = Top2Vec(documents, verbose=True, ngram_vocab=True,
                                 embedding_model=get_top2vec_embedding_model())
         top2vec_model.save(top2vec_model_path)
     return top2vec_model
@@ -45,11 +43,11 @@ def get_BERTopic_model(text_type: str) -> BERTopic:
         topic_model = BERTopic.load(top2vec_model_path)
     except Exception as err:
         print("BERTopic model not found.")
-        print("Training new model...")
         # use cleaned documents
-        documents_cleaned = get_documents_list('cleaned_paragraphs')
-        vectorizer_model = CountVectorizer(ngram_range=(1, 2))
-        topic_model = BERTopic(verbose=True, language=language_model, vectorizer_model=vectorizer_model)
+        documents_cleaned = get_documents_list(text_type)
+        print(f"Training new model on {len(documents_cleaned)} documents.")
+        vectorizer_model = CountVectorizer(ngram_range=(1, 2), stop_words=get_stop_words(language))
+        topic_model = BERTopic(verbose=True, language=language_model, vectorizer_model=vectorizer_model )
         topics, probs = topic_model.fit_transform(documents_cleaned)
         topic_model.save(top2vec_model_path)
     return topic_model

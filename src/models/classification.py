@@ -4,7 +4,6 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.preprocessing import MinMaxScaler
-
 from data import get_groups
 
 
@@ -55,3 +54,5 @@ def print_classification_report(y_pred, y_test):
     print(classification_report(y_test, y_pred, target_names=[group_0.label, group_1.label]))
     print(f"classes in y_pred: {set(y_pred)} classes in y_test: {set(y_test)}")
     print("############################################################################")
+
+

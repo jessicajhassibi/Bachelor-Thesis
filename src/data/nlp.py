@@ -1,9 +1,8 @@
 import os
 import spacy
 import re
-from nltk.corpus import stopwords
-from .config_helpers import get_languages, get_spacy_language_model
-from .nlp_helpers import get_full_language_word
+from .config_helpers import get_spacy_language_model
+from .nlp_helpers import get_stop_words
 
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
@@ -21,19 +20,17 @@ def clean_texts(text, lang="en") -> list():
     text = re.sub("(\[.*\])", "", text)  # remove phonetic spelling like [ˈbeːlɒ:ˈbɒrtoːk']
     words = list()
     doc = nlp(text)
-    punctuation_marks = [",", ".", ";", ":", "-", "–", '"', "/", '""', "''" "'", "(", ")", "[", "]", "!", "?", "=", "{",
-                         "}", "&", '*', '†']
+    punctuation_marks = [",", ".", ";", ":", "-", "–", '"', '„',  '“', "/", '""', "''" "'", "(", ")", "[", "]", "!",
+                         "?", "=", "{", "}", "&", '*', '†']
     for sent in list(doc.sents):
         for token in sent:
-            # TODO: get lemma
-            # print(token, token.lemma)
-            word = token.text
-            if is_stop_word(word, lang):
+            lemmatized_word = token.lemma_
+            if is_stop_word(lemmatized_word, lang):
                 continue
-            elif word in punctuation_marks:
+            elif lemmatized_word in punctuation_marks:
                 continue
             else:
-                words.append(word)
+                words.append(lemmatized_word)
     return words
 
 
@@ -46,25 +43,13 @@ def clean_paragraphs(paragraphs, lang):
 
 
 def is_stop_word(word, lang):
-    sw = stopwords.words(get_full_language_word(lang))
-    sw.append("isbn")
+    sw = get_stop_words(lang)
     if word in sw:
         return True
     # elif re.match(r"\d+", word):  # e.g. "1" or "20" but not a year (1994) as it may contain historical information:
     #    return True  # TODO: remove month and day; but years gone?!
     else:
         return False
-
-
-def get_stop_words() -> list:
-    """
-    merges stopwords for each language
-    """
-    stop_words = list()
-    for lang in get_languages():
-        lang = get_full_language_word(lang)
-        stop_words = stop_words + stopwords.words(lang)
-    return stop_words
 
 
 def get_sentences(texts: list):

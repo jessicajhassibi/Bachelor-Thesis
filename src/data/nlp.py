@@ -1,9 +1,9 @@
-import pandas as pd
 import os
 import spacy
 import re
 from nltk.corpus import stopwords
 from .config_helpers import get_languages, get_spacy_language_model
+from .nlp_helpers import get_full_language_word
 
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
@@ -84,11 +84,3 @@ def get_cleaned_sentences(texts: list):
             cleaned_sent = clean_texts(sent.text)
             sentences.append(cleaned_sent)
     return sentences
-
-
-def get_full_language_word(lang):
-    langs_dict = {"en": "english", "de": "german", "es": "spanish", "ar": "arabic", "fr": "french", "it": "italian"}
-    return langs_dict[lang]
-
-
-#%%

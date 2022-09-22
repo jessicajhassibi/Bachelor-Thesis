@@ -20,14 +20,14 @@ def clean_texts(text, lang="en") -> list():
     text = re.sub("(\[.*\])", "", text)  # remove phonetic spelling like [ˈbeːlɒ:ˈbɒrtoːk']
     words = list()
     doc = nlp(text)
-    punctuation_marks = [",", ".", ";", ":", "-", "–", '"', '„',  '“', "/", '""', "''" "'", "(", ")", "[", "]", "!",
-                         "?", "=", "{", "}", "&", '*', '†']
+    punctuation_marks = [",", ".", ";", ":", "(;", "-", "–", '"', '„',  '“', "/", '""', "''" "'", "(", ")", "[", "]",
+                         "!", "?", "=", "{", "}", "&", '*', '†']
     for sent in list(doc.sents):
         for token in sent:
             lemmatized_word = token.lemma_
             if is_stop_word(lemmatized_word, lang):
                 continue
-            elif lemmatized_word in punctuation_marks:
+            elif token.text in punctuation_marks:
                 continue
             else:
                 words.append(lemmatized_word)

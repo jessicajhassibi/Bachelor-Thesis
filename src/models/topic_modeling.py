@@ -20,8 +20,7 @@ def get_top2vec_model(text_type: str) -> Top2Vec:
         print("Top2Vec model not found.")
         documents = get_documents_list(text_type)
         print(f"Training new model on {len(documents)} documents.")
-        top2vec_model = Top2Vec(documents, verbose=True, ngram_vocab=True,
-                                embedding_model=get_top2vec_embedding_model())
+        top2vec_model = Top2Vec(documents, verbose=True, ngram_vocab=True)
         top2vec_model.save(top2vec_model_path)
     return top2vec_model
 

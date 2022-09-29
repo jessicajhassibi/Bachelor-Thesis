@@ -6,12 +6,13 @@ channels:
 dependencies:
   - python=3.9
   - anaconda
-  - pandas
   - numpy
+  - pandas
+  - jupyter
   - ipykernel
   - nb_conda_kernels
-  - jupyter
   - transformers
+  - matplotlib
   - spacy # with conda-forge
   - pip
   - pip:

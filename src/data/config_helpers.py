@@ -1,5 +1,8 @@
 from configparser import ConfigParser
 
+import spacy
+import de_core_news_sm
+# import en_core_web_sm TODO: fix error on downloading english model
 from .models import Group
 from .path_helpers import get_config_ini_path
 
@@ -35,8 +38,20 @@ def get_languages():
     return group_0.wiki_languages
 
 
-def get_spacy_language_model():
-    return config["SPACY_MODEL"]["SPACY_LANGUAGE_MODEL"]
+def get_spacy_language_models()-> dict:
+    language_models: dict = dict()
+    for lang in get_languages():
+        if lang == "de":
+            model_name = "SPACY_LANGUAGE_MODEL_DE"
+        elif lang == "en":
+            #model_name = "SPACY_LANGUAGE_MODEL_EN" TODO: fix model download and uncomment
+            model_name = "SPACY_LANGUAGE_MODEL_XX"
+        else:  # use multilingual model for other languages
+            model_name = "SPACY_LANGUAGE_MODEL_XX"
+        lang_model = config["SPACY_MODEL"][model_name]
+        language_models[lang] = spacy.load(lang_model)
+    # TODO: Load only once
+    return language_models
 
 
 def get_top2vec_embedding_model():

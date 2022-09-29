@@ -1,7 +1,6 @@
-import json
 from transformers import AutoModel, AutoTokenizer
 from sentence_transformers import SentenceTransformer
-
+from tabulate import tabulate
 
 class BertConverter:
     def __init__(self, model_name='bert-base-uncased', device_number=0):
@@ -39,9 +38,6 @@ class BertSentenceConverter:
         self.model.eval()
 
     def encode_to_vec(self, sentences, token=None, nlp=False):
-        if type(sentences) == str:
-            sentences = [sentences]
-
         for sentence in sentences:
             if len(sentence) > 0 and sentence[-1] != ".":
                 sentence += "."
@@ -51,18 +47,10 @@ class BertSentenceConverter:
         return embeddings.detach().cpu().numpy().tolist()
 
 
-if __name__ == '__main__':
-    input_sentences = ["Derecho privado", "Private law", "Diritto privato"]
-    bert_converter = BertConverter("bert-base-multilingual-cased", 0)
-    vectors = bert_converter.encode_to_vec(input_sentences)
 
-    with open("article_data.json") as json_file:
-        data = json.load(json_file)
-        data_vectors = data['vec']
-        # Comparing vectors
-        print("True if vectors are the same:")
-        print(vectors == data_vectors)
-        print("My result:")
-        print(vectors)
-        print("Result from article_data.json:")
-        print(data_vectors)
+
+#%%
+
+#%%
+
+#%%

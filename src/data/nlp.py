@@ -1,22 +1,22 @@
 import os
 import spacy
 import re
-from .config_helpers import get_spacy_language_model
+from .config_helpers import get_spacy_language_models
 from .nlp_helpers import get_stop_words
 
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
-# TODO: try with large model
-nlp = spacy.load(get_spacy_language_model())
-print("SpaCy pipeline loaded")
-# Adding the 'sentencizer component to the pipeline
-nlp.add_pipe('sentencizer')
+spacy_models: dict = get_spacy_language_models()
 
 
 def clean_texts(text, lang="en") -> list():
     """
     Cleans data by applying tokenization, removal of stop words
     """
+    nlp = spacy_models[lang]
+    print("SpaCy pipeline loaded")
+    # Adding the 'sentencizer component to the pipeline
+    nlp.add_pipe('sentencizer')
     text = re.sub("(\[.*\])", "", text)  # remove phonetic spelling like [ˈbeːlɒ:ˈbɒrtoːk']
     words = list()
     doc = nlp(text)
@@ -52,7 +52,8 @@ def is_stop_word(word, lang):
         return False
 
 
-def get_sentences(texts: list):
+def get_sentences(texts: list, lang):
+    nlp = spacy_models[lang]
     sentences = list()
     for text in texts:
         doc = nlp(text)
@@ -61,7 +62,8 @@ def get_sentences(texts: list):
     return sentences
 
 
-def get_cleaned_sentences(texts: list):
+def get_cleaned_sentences(texts: list, lang):
+    nlp = spacy_models[lang]
     sentences = list()
     for text in texts:
         doc = nlp(text)

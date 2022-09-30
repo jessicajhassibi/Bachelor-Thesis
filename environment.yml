@@ -7,21 +7,21 @@ dependencies:
   - python=3.9
   - anaconda
   - numpy
-  - pandas
   - jupyter
   - ipykernel
   - nb_conda_kernels
   - transformers
-  - matplotlib
   - spacy # with conda-forge
   - pip
   - pip:
       - sentence-transformers
       - bertopic
-      - wikipedia-api # pip3
+      - wikipedia-api
       - top2vec
       - gensim
       - nltk
-      - imblearn # pip3
+      - imblearn
+      - matplotlib
+      - pandas
 
 

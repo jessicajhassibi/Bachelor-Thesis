@@ -1,5 +1,4 @@
 import os
-import spacy
 import re
 from .config_helpers import get_spacy_language_models
 from .nlp_helpers import get_stop_words
@@ -14,9 +13,6 @@ def clean_texts(text, lang="en") -> list():
     Cleans data by applying tokenization, removal of stop words
     """
     nlp = spacy_models[lang]
-    print("SpaCy pipeline loaded")
-    # Adding the 'sentencizer component to the pipeline
-    nlp.add_pipe('sentencizer')
     text = re.sub("(\[.*\])", "", text)  # remove phonetic spelling like [ˈbeːlɒ:ˈbɒrtoːk']
     words = list()
     doc = nlp(text)
@@ -51,23 +47,3 @@ def is_stop_word(word, lang):
     else:
         return False
 
-
-def get_sentences(texts: list, lang):
-    nlp = spacy_models[lang]
-    sentences = list()
-    for text in texts:
-        doc = nlp(text)
-        for sent in list(doc.sents):
-            sentences.append(sent.text)
-    return sentences
-
-
-def get_cleaned_sentences(texts: list, lang):
-    nlp = spacy_models[lang]
-    sentences = list()
-    for text in texts:
-        doc = nlp(text)
-        for sent in list(doc.sents):
-            cleaned_sent = clean_texts(sent.text)
-            sentences.append(cleaned_sent)
-    return sentences

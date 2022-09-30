@@ -44,12 +44,14 @@ def get_spacy_language_models()-> dict:
         if lang == "de":
             model_name = "SPACY_LANGUAGE_MODEL_DE"
         elif lang == "en":
-            #model_name = "SPACY_LANGUAGE_MODEL_EN" TODO: fix model download and uncomment
-            model_name = "SPACY_LANGUAGE_MODEL_XX"
+            model_name = "SPACY_LANGUAGE_MODEL_EN"
         else:  # use multilingual model for other languages
             model_name = "SPACY_LANGUAGE_MODEL_XX"
         lang_model = config["SPACY_MODEL"][model_name]
-        language_models[lang] = spacy.load(lang_model)
+        nlp = spacy.load(lang_model)
+        print(f"loaded spacy language model: {lang_model}")
+        nlp.add_pipe('sentencizer')
+        language_models[lang] = nlp
     # TODO: Load only once
     return language_models
 

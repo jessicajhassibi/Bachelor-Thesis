@@ -84,9 +84,12 @@ def _scrape_pages(pages_name: list, group: Group):
                         if section.text == "":
                             for subsection in section.sections:
                                 if subsection.text != "":
-                                    paragraphs.append(subsection.text)
+                                    text_to_add = subsection.text
                         else:
-                            paragraphs.append(section.text)
+                            text_to_add = section.text
+
+                        paragraphs.append(text_to_add)
+
                     json_dict["paragraphs"] = paragraphs
                     text = ' '.join([p for p in paragraphs])
                     json_dict["text"] = text

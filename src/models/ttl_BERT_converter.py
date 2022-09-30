@@ -1,6 +1,5 @@
 from transformers import AutoModel, AutoTokenizer
 from sentence_transformers import SentenceTransformer
-from tabulate import tabulate
 
 class BertConverter:
     def __init__(self, model_name='bert-base-uncased', device_number=0):

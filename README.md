@@ -38,10 +38,13 @@ python -m ipykernel install --user --name thesis --display-name "thesis kernel"
 ```
 
 #### required for spacy:
-Download Language models of languages you want to use.
+Download Language models of languages you want to use. \
+Note: There might be problems installing those on apple machine with M1 chip. \
+Switching to another machine solved it for me... 
 ``` shell
-export  KMP_DUPLICATE_LIB_OK=TRUE
 python -m spacy download 'de_core_news_sm' # german model
+python -m spacy download 'en_core_web_sm' # english model
+python -m spacy download 'xx_ent_wiki_sm' # multilingual model
 ```
 
 ### update dependencies

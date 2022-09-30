@@ -13,8 +13,7 @@ def get_dataframe_from_json(file: str):
     return df
 
 
-def get_documents_list(text_type = 'paragraphs'):
-    # TODO: Add sentences to csv like paragraphs
+def get_documents_list(text_type='paragraphs'):
     """
     Get list of documents.
     Can be either 'texts' or 'paragraphs'
@@ -22,6 +21,7 @@ def get_documents_list(text_type = 'paragraphs'):
     """
     if text_type == 'paragraphs':
         paragraphs_list = get_dataframes()['paragraphs'].values.tolist()
+        print(paragraphs_list)
         documents = [paragraph for paragraphs in paragraphs_list for paragraph in paragraphs]
     elif text_type == 'cleaned_paragraphs':
         paragraphs_list = get_cleaned_dataframes()['cleaned_paragraphs'].values.tolist()
@@ -73,7 +73,9 @@ def create_dataframes():
         # create dataframe with both groups
         df = pd.DataFrame()
         df["paragraphs"] = pd.concat([df_group_0["paragraphs"], df_group_1["paragraphs"]], ignore_index=True)
+        df["paragraphs"] = df["paragraphs"].apply(lambda x: [p.replace("\n", " ") for p in x])
         df["texts"] = pd.concat([df_group_0["text"], df_group_1["text"]], ignore_index=True)
+        df["texts"] = df["texts"].apply(lambda x: x.replace("\n", " "))
         df["label"] = pd.concat([df_group_0["label"], df_group_1["label"]], ignore_index=True)
         # Encoding the label column
         df['label'] = df['label'].map({group_1.label: 1, group_0.label: 0})

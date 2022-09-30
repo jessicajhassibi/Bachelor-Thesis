@@ -42,8 +42,6 @@ def is_stop_word(word, lang):
     sw = get_stop_words(lang)
     if word in sw:
         return True
-    # elif re.match(r"\d+", word):  # e.g. "1" or "20" but not a year (1994) as it may contain historical information:
-    #    return True  # TODO: remove month and day; but years gone?!
     else:
         return False
 

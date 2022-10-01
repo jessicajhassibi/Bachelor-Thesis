@@ -1,9 +1,6 @@
-import os
 import re
 from .config_helpers import get_spacy_language_models
 from .nlp_helpers import get_stop_words
-
-os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 spacy_models: dict = get_spacy_language_models()
 

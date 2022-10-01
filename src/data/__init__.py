@@ -1,5 +1,3 @@
-import os
-os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 from .data_analysis import language_analyzer
 from .data_analysis import plot_scraped_data
 from .models import Group

@@ -59,7 +59,7 @@ conda env remove --name thesis
 ```
 
 # Using Docker
-Start docker container:
+Start docker container for the first time:
 ```shell
 docker run -it \
     --volume $(pwd):/home/Bachelor-Thesis \
@@ -76,15 +76,17 @@ apt update \
 && apt install -y gcc vim \
 && conda env create --file environment.yml \
 && conda activate thesis \
+&& echo 'conda activate thesis' >> ~/.bashrc \
 && python -m spacy download 'en_core_web_sm' \
 && python -m spacy download 'de_core_news_sm' \
 && python -m spacy download 'xx_ent_wiki_sm' \
 && python -m ipykernel install --user --name thesis --display-name "thesis kernel"
 ```
 
-To go into container shell
+To go into container shell and environment
 ```shell
 docker exec -it bachelor-thesis bash
+conda activate thesis 
 ```
 
 To start container

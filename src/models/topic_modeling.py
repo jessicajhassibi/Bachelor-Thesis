@@ -15,7 +15,7 @@ def get_top2vec_model(text_type: str) -> Top2Vec:
     languages_string = "_".join(get_languages())
     top2vec_model_path = topic_models_path.joinpath(f"Top2Vec_{languages_string}_{text_type}")
     try:
-        top2vec_model = model.load(str(top2vec_model_path))
+        top2vec_model = Top2Vec.load(str(top2vec_model_path))
     except FileNotFoundError as err:
         print("Top2Vec model not found.")
         documents = get_documents_list(text_type)
@@ -44,10 +44,10 @@ def get_BERTopic_model(text_type: str) -> BERTopic:
     except Exception as err:
         print("BERTopic model not found.")
         # use cleaned documents
-        documents_cleaned = get_documents_list(text_type)
+        documents_cleaned = get_documents_list(text_type) #TODO: fix err on german texts
         print(f"Training new model on {len(documents_cleaned)} documents.")
         vectorizer_model = CountVectorizer(ngram_range=(1, 2), stop_words=get_stop_words(language))
-        topic_model = BERTopic(verbose=True, language=language_model, vectorizer_model=vectorizer_model )
+        topic_model = BERTopic(verbose=True, language=language_model, vectorizer_model=vectorizer_model)
         topics, probs = topic_model.fit_transform(documents_cleaned)
         topic_model.save(top2vec_model_path)
     return topic_model

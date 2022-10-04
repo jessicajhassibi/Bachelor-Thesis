@@ -1,8 +1,6 @@
 from configparser import ConfigParser
 
 import spacy
-import de_core_news_sm
-# import en_core_web_sm TODO: fix error on downloading english model
 from .models import Group
 from .path_helpers import get_config_ini_path
 

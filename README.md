@@ -58,6 +58,47 @@ conda deactivate && \
 conda env remove --name thesis
 ```
 
+# Using Docker
+Start docker container:
+```shell
+docker run -it \
+    --volume $(pwd):/home/Bachelor-Thesis \
+    --workdir /home/Bachelor-Thesis \
+    --publish 8888:8888 \
+    --name bachelor-thesis \
+    continuumio/miniconda3 /bin/bash
+```
+You should be in the container shell now.
+
+Run setup scripts within container shell: 
+```shell
+apt update \
+&& apt install -y gcc vim \
+&& conda env create --file environment.yml \
+&& conda activate thesis \
+&& python -m spacy download 'en_core_web_sm' \
+&& python -m spacy download 'de_core_news_sm' \
+&& python -m spacy download 'xx_ent_wiki_sm' \
+&& python -m ipykernel install --user --name thesis --display-name "thesis kernel"
+```
+
+To go into container shell
+```shell
+docker exec -it bachelor-thesis bash
+```
+
+To start container
+```shell
+docker start bachelor-thesis
+```
+
+When installations are done run jupyter notebook in container.
+```shell
+jupyter notebook --port=8888 --no-browser --allow-root --ip='*' --NotebookApp.token='' --NotebookApp.password=''
+```
+
+Jupyter notebook are under [http://localhost:8888](http://localhost:8888)
+
 ### download pretrained word vectors
 
 We use the Glove vectors trained on Wikipedia 2014 and Gigaword 5.\

@@ -1,5 +1,4 @@
 import pandas as pd
-from .path_helpers import get_dataframes_path, get_cleaned_dataframes_path
 from ast import literal_eval
 from .nlp import clean_texts, clean_paragraphs
 from .path_helpers import get_cleaned_dataframes_path, get_dataframes_path, get_json_target_path
@@ -19,16 +18,12 @@ def get_documents_list(text_type='paragraphs'):
     Can be either 'texts' or 'paragraphs'
     or their cleaned versions 'cleaned_texts' or 'cleaned_paragraphs'
     """
-    if text_type == 'paragraphs':
-        paragraphs_list = get_dataframes()['paragraphs'].values.tolist()
-        documents = [paragraph for paragraphs in paragraphs_list for paragraph in paragraphs]
-    elif text_type == 'cleaned_paragraphs':
-        paragraphs_list = get_cleaned_dataframes()['cleaned_paragraphs'].values.tolist()
+    if text_type == 'paragraphs' or text_type == 'cleaned_paragraphs':
+        paragraphs_list = get_dataframes()[text_type].values.tolist()
         documents = list()
         for paragraphs in paragraphs_list:
             for paragraph in paragraphs:
-                for words in paragraph:
-                    documents.append(words)
+                documents.append(paragraph)
     elif text_type == 'cleaned_texts':  # full (raw/ cleaned) text of article chosen as text type
         documents = get_cleaned_dataframes()['cleaned_texts'].values.tolist()
     else:
@@ -41,8 +36,8 @@ def get_cleaned_dataframes():
     for lang in get_languages():
         # apply conversion to cleaned_text to avoid multiple quotation marks due to wrong pandas csv reading
         lang_df = pd.read_csv(get_cleaned_dataframes_path().joinpath(f"{lang}_df_cleaned.csv").resolve(),
-                              converters={'cleaned_texts': lambda x: literal_eval(x),
-                                          'cleaned_paragraphs': lambda x: literal_eval(x)})
+                              converters={'cleaned_texts': lambda x: x.strip("[]").split(", "),
+                                          'cleaned_paragraphs': lambda x: x.strip("[]").split(", ")})
         lang_dfs_list.append(lang_df)
     df = pd.concat(lang_dfs_list)
     df.drop(labels="Unnamed: 0", axis="columns", inplace=True)
@@ -52,7 +47,9 @@ def get_cleaned_dataframes():
 def get_dataframes():
     lang_dfs_list = []
     for lang in get_languages():
-        lang_df = pd.read_csv(get_dataframes_path().joinpath(f"{lang}_df.csv").resolve())
+        lang_df = pd.read_csv(get_dataframes_path().joinpath(f"{lang}_df.csv").resolve(),
+                  converters={'texts': lambda x: x.strip("[]").split(", "),
+                              'paragraphs': lambda x: x.strip("[]").split(", ")})
         lang_dfs_list.append(lang_df)
     df = pd.concat(lang_dfs_list)
     df.drop(labels="Unnamed: 0", axis="columns", inplace=True)
@@ -85,4 +82,4 @@ def create_dataframes():
         cleaned_df["label"] = df["label"]
         df.reset_index()
         cleaned_df.to_csv(get_cleaned_dataframes_path().joinpath(f'{lang}_df_cleaned.csv'))
-#%%
+# %%

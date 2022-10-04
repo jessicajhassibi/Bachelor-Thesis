@@ -47,4 +47,10 @@ def get_topic_modeling_path():
     return topic_modeling_folder
 
 
+def get_classification_models_path():
+    classification_models_folder: Path = get_models_path().joinpath('classification')
+    classification_models_folder.mkdir(parents=True, exist_ok=True)
+    return classification_models_folder
+
+
 

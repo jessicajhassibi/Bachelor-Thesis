@@ -1,8 +1,5 @@
 # run: conda env create --file environment.yml
 name: thesis
-channels:
-  - defaults
-  - conda-forge
 dependencies:
   - python=3.9
   - anaconda
@@ -11,7 +8,7 @@ dependencies:
   - ipykernel
   - nb_conda_kernels
   - transformers
-  - spacy # with conda-forge
+  - spacy
   - pip
   - pip:
       - sentence-transformers

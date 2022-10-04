@@ -15,14 +15,13 @@ def get_top2vec_model(text_type: str) -> Top2Vec:
     languages_string = "_".join(get_languages())
     top2vec_model_path = topic_models_path.joinpath(f"Top2Vec_{languages_string}_{text_type}")
     try:
-        top2vec_model = Top2Vec.load(str(top2vec_model_path))
-    except Exception as err:
-        print(err)
+        top2vec_model = model.load(str(top2vec_model_path))
+    except FileNotFoundError as err:
         print("Top2Vec model not found.")
         documents = get_documents_list(text_type)
         print(f"Training new model on {len(documents)} documents.")
         top2vec_model = Top2Vec(documents, verbose=True, ngram_vocab=True)
-        print("Saving...")
+        print("Saving model.")
         top2vec_model.save(str(top2vec_model_path))
     return top2vec_model
 

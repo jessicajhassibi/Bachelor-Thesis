@@ -33,21 +33,27 @@ def get_BERTopic_model(text_type: str) -> BERTopic:
     """
     topic_models_path: Path = Path(get_topic_modeling_path())
     languages_string = "_".join(get_languages())
-    top2vec_model_path = topic_models_path.joinpath(f"BERTopic_{languages_string}_{text_type}")
-    if len(get_languages()) > 1:
-        language_model = "multilingual"
-    else:
-        language = get_languages()[0]
-        language_model = get_full_language_word(language)
+    bertopic_model_path = topic_models_path.joinpath(f"BERTopic_{languages_string}_{text_type}")
     try:
-        topic_model = BERTopic.load(top2vec_model_path)
+        topic_model = BERTopic.load(bertopic_model_path)
     except Exception as err:
         print("BERTopic model not found.")
-        # use cleaned documents
-        documents_cleaned = get_documents_list(text_type) #TODO: fix err on german texts
-        print(f"Training new model on {len(documents_cleaned)} documents.")
-        vectorizer_model = CountVectorizer(ngram_range=(1, 2), stop_words=get_stop_words(language))
+        # case A: model trained on monolingual datasets
+        language = get_languages()[0]
+        stopwords = get_stop_words(language)
+        language_model = get_full_language_word(language)
+
+        # case B: model trained on multilingual datasets
+        if len(get_languages()) > 1:
+            language_model = "multilingual"
+            for lang in get_languages()[1:]:
+                stopwords.extend(get_stop_words(lang))
+
+        documents = get_documents_list(text_type)
+        print(f"Training new model on {len(documents)} documents.")
+        vectorizer_model = CountVectorizer(ngram_range=(1, 2), stop_words=stopwords)
         topic_model = BERTopic(verbose=True, language=language_model, vectorizer_model=vectorizer_model)
-        topics, probs = topic_model.fit_transform(documents_cleaned)
-        topic_model.save(top2vec_model_path)
+        topics, probs = topic_model.fit_transform(documents)
+        topic_model.save(bertopic_model_path)
+        print(f"Loaded BERTopic model: {bertopic_model_path}")
     return topic_model

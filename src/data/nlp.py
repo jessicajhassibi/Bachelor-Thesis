@@ -42,3 +42,17 @@ def is_stop_word(word, lang):
     else:
         return False
 
+
+def get_sentences(texts: list, lang):
+    nlp = spacy_models[lang]
+    sentences = list()
+    for text in texts:
+        doc = nlp(text)
+        sentences_in_text = []
+        for sent in list(doc.sents):
+            sentences_in_text.append(sent.text)
+        sentences.append(sentences_in_text)
+    return sentences
+
+
+

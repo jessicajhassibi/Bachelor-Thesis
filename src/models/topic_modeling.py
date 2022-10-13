@@ -2,7 +2,7 @@ from pathlib import Path
 from top2vec import Top2Vec
 from bertopic import BERTopic
 from data import get_documents_list, get_topic_modeling_path, get_top2vec_embedding_model, get_languages, \
-    get_full_language_word, get_stop_words
+    get_full_language_word, get_stop_words, get_dataframes
 from sklearn.feature_extraction.text import CountVectorizer
 
 
@@ -57,3 +57,4 @@ def get_BERTopic_model(text_type: str) -> BERTopic:
         topic_model.save(bertopic_model_path)
         print(f"Loaded BERTopic model: {bertopic_model_path}")
     return topic_model
+

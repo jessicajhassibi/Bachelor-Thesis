@@ -53,4 +53,15 @@ def get_classification_models_path():
     return classification_models_folder
 
 
+def get_word2vec_models_path():
+    word2vec_models_folder: Path = get_classification_models_path().joinpath('Word2Vec')
+    word2vec_models_folder.mkdir(parents=True, exist_ok=True)
+    return word2vec_models_folder
+
+def get_fasttext_models_path():
+    fasttext_models_folder: Path = get_classification_models_path().joinpath('FastText')
+    fasttext_models_folder.mkdir(parents=True, exist_ok=True)
+    return fasttext_models_folder
+
+
 

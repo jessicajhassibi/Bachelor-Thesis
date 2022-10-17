@@ -45,7 +45,7 @@ def get_BERTopic_model(text_type: str) -> BERTopic:
 
         # case B: model trained on multilingual datasets
         if len(get_languages()) > 1:
-            language_model = "multilingual"
+            language_model = "multilingual"             # TODO: try sentence transformer distiluse-base-multilingual-cased
             for lang in get_languages()[1:]:
                 stopwords.extend(get_stop_words(lang))
 

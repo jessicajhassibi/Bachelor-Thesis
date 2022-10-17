@@ -1,9 +1,10 @@
+from typing import Optional
+
 import pandas as pd
 from ast import literal_eval
 from .nlp import clean_texts, clean_paragraphs, get_sentences
 from .path_helpers import get_cleaned_dataframes_path, get_dataframes_path, get_json_target_path
 from .config_helpers import get_groups, get_languages
-import csv
 
 
 def get_dataframe_from_json(file: str):
@@ -44,13 +45,31 @@ def get_documents_list(text_type='paragraphs'):
     return documents
 
 
+def clean_str_for_df(text: str) -> str:
+    return text.replace("[", "").replace("]", "").replace("'", "")
+
+
+def clean_words_after_reading_csv(text: str) -> list:
+    return clean_str_for_df(text).split(',')
+
+
+def clean_paragraphs_after_reading_csv(text: str) -> list:
+    cleaned_parags = list()
+    list_of_paragraphs: list = text[1:-1].split("],")
+    for parag in list_of_paragraphs:
+        cleaned_parag = clean_str_for_df(parag).split(",")
+        cleaned_parags.append(cleaned_parag)
+    return cleaned_parags
+
+
 def get_cleaned_dataframes():
     lang_dfs_list = []
     for lang in get_languages():
         # apply conversion to cleaned_text to avoid multiple quotation marks due to wrong pandas csv reading
         lang_df = pd.read_csv(get_cleaned_dataframes_path().joinpath(f"{lang}_df_cleaned.csv").resolve(),
-                              converters={'cleaned_texts': lambda x: x.strip("[]").split(", "),
-                                          'cleaned_paragraphs': lambda x:  x[1:-1].split(", ")})
+                              converters={'cleaned_texts': lambda x: clean_words_after_reading_csv(x),
+                                          'cleaned_paragraphs': lambda x: clean_paragraphs_after_reading_csv(
+                                              x)})
         lang_dfs_list.append(lang_df)
     df = pd.concat(lang_dfs_list)
     df.drop(labels="Unnamed: 0", axis="columns", inplace=True)
@@ -103,7 +122,6 @@ def create_dataframes():
         cleaned_df["label"] = df["label"]
         df.reset_index()
         cleaned_df.to_csv(get_cleaned_dataframes_path().joinpath(f'{lang}_df_cleaned.csv'))
-# %%
 
 
 def get_topic_of_every_doc(bertopic_model, docs, number_topics):
@@ -151,11 +169,14 @@ def get_topics_for_articles(bertopic_model, num_topics):
     return topics_for_each_article
 
 
-# TODO: save correctly to df
-def get_cleaned_dataframe_with_topics(bertopic_model, num_topics=3): # TODO: set num_topics to average text size
+def get_cleaned_dataframe_with_topics(bertopic_model, num_topics=3):
     topic_df = get_cleaned_dataframes()
-    topics_list = get_topics_for_articles(bertopic_model, num_topics)
-    topics_series = pd.Series((t for t in topics_list))
-    topic_df["topics"] = topics_series  # TODO: add paragraph_topics column with paragraph num of row for the topics
+    topics_articles_list = get_topics_for_articles(bertopic_model, num_topics)
+    topics_series = pd.Series((t for t in topics_articles_list))
+    topic_df.insert(2, "topics", topics_series)  # TODO: add paragraph_topics column with paragraph num of row for the topics
+    # add topics as strings to article words
+    topic_df.insert(3, "cleaned_texts_topics", topic_df["cleaned_texts"] + topic_df["topics"])
+    # add topics as list of words to paragraphs list = additional topics paragraph
+    topic_df.insert(4, 'cleaned_paragraphs_topics', topic_df["cleaned_paragraphs"] + topic_df["topics"].values.tolist())
     topic_df.to_csv(get_cleaned_dataframes_path().joinpath(f'topics_df.csv'))
-    return topic_df #TODO: paragraphs messed up and strings
+    return topic_df

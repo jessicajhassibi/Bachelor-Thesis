@@ -7,7 +7,7 @@ from gensim import models
 def get_embedding_model(train_data, text_type, method= "Word2Vec"):
     languages_string = "_".join(get_languages())
     if method == "Word2Vec":
-        word2vec_models_path = get_word2vec_models_path.joinpath(f"Word2Vec_{languages_string}_{text_type}")
+        word2vec_models_path = get_word2vec_models_path().joinpath(f"Word2Vec_{languages_string}_{text_type}")
         try:
             model = Word2Vec.load(f"{word2vec_models_path}.model")
             # load model as KeyedVectors
@@ -26,7 +26,7 @@ def get_embedding_model(train_data, text_type, method= "Word2Vec"):
     elif method == "fastText":
         fasttext_models_path = get_fasttext_models_path().joinpath(f"FastText_{languages_string}_{text_type}")
         try:
-            model = Word2Vec.load(f"{fasttext_models_path}.model")
+            model = FastText.load(f"{fasttext_models_path}.model")
             # load model as KeyedVectors
             wv = models.KeyedVectors.load(f"{fasttext_models_path}.wordvectors")
         except FileNotFoundError as err:

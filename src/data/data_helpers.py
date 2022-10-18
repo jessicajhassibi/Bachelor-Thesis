@@ -14,20 +14,26 @@ def get_dataframe_from_json(file: str):
     return df
 
 
-def get_documents_list(text_type='paragraphs'):
+def get_documents_list(text_type='paragraphs'): # TODO: extend function to topics
     """
     Get list of documents.
     Can be either 'texts', 'paragraphs' or 'sentences'
     or their cleaned versions 'cleaned_texts' etc. (Note: no cleaned_sentences option)
     """
     documents = list()
-    if text_type == 'cleaned_paragraphs':
+
+    if text_type == 'cleaned_texts':  # full (raw/ cleaned) text of article chosen as text type
+        documents.extend(get_cleaned_dataframe_with_topics()['cleaned_texts'].values.tolist())
+
+    elif text_type == 'cleaned_texts_topics':
+        documents.extend(get_cleaned_dataframe_with_topics()['cleaned_texts_topics'].values.tolist())
+
+    elif text_type == 'cleaned_paragraphs':
         paragraphs_list = get_cleaned_dataframe_with_topics()[text_type].values.tolist()
         for paragraphs in paragraphs_list:
             for paragraph in paragraphs:
                 documents.append(paragraph)
-    elif text_type == 'cleaned_texts':  # full (raw/ cleaned) text of article chosen as text type
-        documents.extend(get_cleaned_dataframe_with_topics()['cleaned_texts'].values.tolist())
+
     elif text_type == 'paragraphs':
         paragraphs_list = get_dataframes()['paragraphs'].values.tolist()
         for paragraphs in paragraphs_list:
@@ -169,14 +175,31 @@ def get_topics_for_articles(bertopic_model, num_topics):
     return topics_for_each_article
 
 
-def get_cleaned_dataframe_with_topics(bertopic_model, num_topics=3):
+def get_cleaned_dataframe_with_topics():
+    # apply conversion to cleaned_text to avoid multiple quotation marks due to wrong pandas csv reading
+    topics_df = pd.read_csv(get_cleaned_dataframes_path().joinpath(f'5_topics_df.csv').resolve(),
+                          converters={'cleaned_texts': lambda x: clean_words_after_reading_csv(x),
+                                      'cleaned_paragraphs': lambda x: clean_paragraphs_after_reading_csv(x),
+                                      'topics': lambda x: clean_words_after_reading_csv(x),
+                                      'topics_lists': lambda x: clean_paragraphs_after_reading_csv(x),
+                                      'cleaned_texts_topics': lambda x: clean_words_after_reading_csv(x),
+                                      'cleaned_paragraphs_topics': lambda x: clean_paragraphs_after_reading_csv(x)})
+
+    topics_df.drop(labels="Unnamed: 0", axis="columns", inplace=True)
+    return topics_df
+
+
+def create_cleaned_dataframe_with_topics(bertopic_model, num_topics=5):
     topic_df = get_cleaned_dataframes()
     topics_articles_list = get_topics_for_articles(bertopic_model, num_topics)
     topics_series = pd.Series((t for t in topics_articles_list))
+    topics_list_series = pd.Series(([t] for t in topics_articles_list))
+    # TODO: why does it add a tab before words?
     topic_df.insert(2, "topics", topics_series)  # TODO: add paragraph_topics column with paragraph num of row for the topics
+    topic_df.insert(3, "topics_lists", topics_list_series)  # TODO: add paragraph_topics column with paragraph num of row for the topics
     # add topics as strings to article words
-    topic_df.insert(3, "cleaned_texts_topics", topic_df["cleaned_texts"] + topic_df["topics"])
+    topic_df.insert(4, "cleaned_texts_topics", topic_df["cleaned_texts"] + topic_df["topics"])
     # add topics as list of words to paragraphs list = additional topics paragraph
-    topic_df.insert(4, 'cleaned_paragraphs_topics', topic_df["cleaned_paragraphs"] + topic_df["topics"].values.tolist())
-    topic_df.to_csv(get_cleaned_dataframes_path().joinpath(f'topics_df.csv'))
+    topic_df.insert(5, 'cleaned_paragraphs_topics', topic_df["cleaned_paragraphs"] + topic_df["topics_lists"])
+    topic_df.to_csv(get_cleaned_dataframes_path().joinpath(f'{num_topics}_topics_df.csv'))
     return topic_df

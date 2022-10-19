@@ -14,7 +14,7 @@ def get_dataframe_from_json(file: str):
     return df
 
 
-def get_documents_list(text_type='paragraphs'): # TODO: extend function to topics
+def get_documents_list(text_type='paragraphs'): # TODO: extend function to topics & cleaned sentences
     """
     Get list of documents.
     Can be either 'texts', 'paragraphs' or 'sentences'
@@ -22,13 +22,13 @@ def get_documents_list(text_type='paragraphs'): # TODO: extend function to topic
     """
     documents = list()
 
-    if text_type == 'cleaned_texts':  # full (raw/ cleaned) text of article chosen as text type
-        documents.extend(get_cleaned_dataframe_with_topics()['cleaned_texts'].values.tolist())
+    if text_type == 'cleaned_texts' or text_type == 'topics':  # full (raw/ cleaned) text of article chosen as text type
+        documents.extend(get_cleaned_dataframe_with_topics()[text_type].values.tolist())
 
     elif text_type == 'cleaned_texts_topics':
         documents.extend(get_cleaned_dataframe_with_topics()['cleaned_texts_topics'].values.tolist())
 
-    elif text_type == 'cleaned_paragraphs':
+    elif text_type == 'cleaned_paragraphs' or text_type == 'cleaned_paragraphs_topics' or text_type == 'cleaned_sentences':
         paragraphs_list = get_cleaned_dataframe_with_topics()[text_type].values.tolist()
         for paragraphs in paragraphs_list:
             for paragraph in paragraphs:
@@ -39,6 +39,8 @@ def get_documents_list(text_type='paragraphs'): # TODO: extend function to topic
         for paragraphs in paragraphs_list:
             for paragraph in paragraphs:
                 documents.append(paragraph)
+
+
     else:
         texts_list = get_dataframes()['texts'].values.tolist()
         if text_type == 'sentences':
@@ -56,14 +58,14 @@ def clean_str_for_df(text: str) -> str:
 
 
 def clean_words_after_reading_csv(text: str) -> list:
-    return clean_str_for_df(text).split(',')
+    return clean_str_for_df(text).split(', ')
 
 
 def clean_paragraphs_after_reading_csv(text: str) -> list:
     cleaned_parags = list()
     list_of_paragraphs: list = text[1:-1].split("],")
     for parag in list_of_paragraphs:
-        cleaned_parag = clean_str_for_df(parag).split(",")
+        cleaned_parag = clean_str_for_df(parag).split(", ")
         cleaned_parags.append(cleaned_parag)
     return cleaned_parags
 
@@ -125,6 +127,7 @@ def create_dataframes():
         cleaned_df = pd.DataFrame()
         cleaned_df["cleaned_texts"] = df["texts"].apply(lambda x: clean_texts(x, lang))
         cleaned_df["cleaned_paragraphs"] = df["paragraphs"].apply(lambda x: clean_paragraphs(x, lang))
+        cleaned_df["cleaned_sentences"] = df["sentences"].apply(lambda x: clean_paragraphs(x, lang))
         cleaned_df["label"] = df["label"]
         df.reset_index()
         cleaned_df.to_csv(get_cleaned_dataframes_path().joinpath(f'{lang}_df_cleaned.csv'))
@@ -180,6 +183,7 @@ def get_cleaned_dataframe_with_topics():
     topics_df = pd.read_csv(get_cleaned_dataframes_path().joinpath(f'5_topics_df.csv').resolve(),
                           converters={'cleaned_texts': lambda x: clean_words_after_reading_csv(x),
                                       'cleaned_paragraphs': lambda x: clean_paragraphs_after_reading_csv(x),
+                                      'cleaned_sentences': lambda x: clean_paragraphs_after_reading_csv(x),
                                       'topics': lambda x: clean_words_after_reading_csv(x),
                                       'topics_lists': lambda x: clean_paragraphs_after_reading_csv(x),
                                       'cleaned_texts_topics': lambda x: clean_words_after_reading_csv(x),

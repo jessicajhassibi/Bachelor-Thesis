@@ -21,4 +21,7 @@ dependencies:
       - matplotlib
       - pandas
 
+# conda install pytorch torchvision torchaudio -c pytorch
+# conda install faiss-cpu -c pytorch
+
 

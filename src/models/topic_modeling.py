@@ -51,7 +51,7 @@ def get_BERTopic_model(text_type: str) -> BERTopic:
 
         documents = get_documents_list(text_type)
         print(f"Training new model on {len(documents)} documents.")
-        vectorizer_model = CountVectorizer(ngram_range=(1, 2), stop_words=stopwords)
+        vectorizer_model = CountVectorizer(stop_words=stopwords)
         topic_model = BERTopic(verbose=True, language=language_model, vectorizer_model=vectorizer_model)
         topics, probs = topic_model.fit_transform(documents)
         topic_model.save(bertopic_model_path)

@@ -7,7 +7,7 @@ from sklearn.preprocessing import MinMaxScaler
 from data import get_groups
 
 
-def text2vec(text, keyed_vectors): # TODO: fix on cleaned_paragraphs
+def text2vec(text, keyed_vectors):
     # takes gensim KeyedVectors object  and pandas series object of preprocessed sentences
     # and maps each word in the sentences to the corresponding vector
     # returns numpy array (for the text) of numpy arrays (sentences) of vectors (words)

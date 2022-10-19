@@ -1,5 +1,5 @@
 # run: conda env create --file environment.yml
-name: thesis
+name: thesisd
 dependencies:
   - python=3.9
   - anaconda

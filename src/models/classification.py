@@ -43,7 +43,10 @@ def classify_predict(X_train_avg, X_test_avg, y_train_data, classifier_type: str
         X_train_avg = scaler.fit_transform(X_train_avg)
         X_test_avg = scaler.transform(X_test_avg)
 
-    classifier_model = classifier.fit(X_train_avg, y_train_data.values.ravel())
+    try: # case for FastText
+        classifier_model = classifier.fit(X_train_avg, y_train_data.values.ravel())
+    except: # case for SF
+        classifier_model = classifier.fit(X_train_avg, y_train_data)
     # Use the trained model to make predictions on the test data
     y_pred_data = classifier_model.predict(X_test_avg)
     return y_pred_data

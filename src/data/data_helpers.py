@@ -179,8 +179,9 @@ def get_topics_for_articles(bertopic_model, num_topics):
 
 
 def get_cleaned_dataframe_with_topics():
+    languages_string = "_".join(get_languages())
     # apply conversion to cleaned_text to avoid multiple quotation marks due to wrong pandas csv reading
-    topics_df = pd.read_csv(get_cleaned_dataframes_path().joinpath(f'5_topics_df.csv').resolve(),
+    topics_df = pd.read_csv(get_cleaned_dataframes_path().joinpath(f'5_topics_{languages_string}.csv').resolve(),
                           converters={'cleaned_texts': lambda x: clean_words_after_reading_csv(x),
                                       'cleaned_paragraphs': lambda x: clean_paragraphs_after_reading_csv(x),
                                       'cleaned_sentences': lambda x: clean_paragraphs_after_reading_csv(x),
@@ -194,6 +195,7 @@ def get_cleaned_dataframe_with_topics():
 
 
 def create_cleaned_dataframe_with_topics(bertopic_model, num_topics=5):
+    languages_string = "_".join(get_languages())
     topic_df = get_cleaned_dataframes()
     topics_articles_list = get_topics_for_articles(bertopic_model, num_topics)
     topics_series = pd.Series((t for t in topics_articles_list))
@@ -205,5 +207,5 @@ def create_cleaned_dataframe_with_topics(bertopic_model, num_topics=5):
     topic_df.insert(4, "cleaned_texts_topics", topic_df["cleaned_texts"] + topic_df["topics"])
     # add topics as list of words to paragraphs list = additional topics paragraph
     topic_df.insert(5, 'cleaned_paragraphs_topics', topic_df["cleaned_paragraphs"] + topic_df["topics_lists"])
-    topic_df.to_csv(get_cleaned_dataframes_path().joinpath(f'{num_topics}_topics_df.csv'))
+    topic_df.to_csv(get_cleaned_dataframes_path().joinpath(f'{num_topics}_topics_{languages_string}.csv'))
     return topic_df

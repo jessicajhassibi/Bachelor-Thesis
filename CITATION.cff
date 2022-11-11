@@ -3,7 +3,7 @@
 
 cff-version: 1.2.0
 title: >-
-  Mono- und Multilinguale Textklassifikation von
+  Multi- und Monolinguale Textklassifikation von
   Wikipedia-Artikeln zu einem Thema der
   Musikgeschichte
 message: >-
@@ -13,3 +13,6 @@ type: software
 authors:
   - given-names: Jessica Jasmin
     family-names: Hassibi
+repository-code: 'https://github.com/jessicajhassibi/Bachelor-Thesis'
+version: '1.0'
+date-released: '2022-11-28'

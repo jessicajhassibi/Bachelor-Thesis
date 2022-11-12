@@ -5,7 +5,7 @@ from .models import Group
 from .path_helpers import get_config_ini_path
 
 config = ConfigParser()
-config.read(filenames= get_config_ini_path(), encoding="ISO-8859-1")
+config.read(filenames=get_config_ini_path(), encoding="utf-8")
 
 
 def get_groups() -> (Group, Group):
@@ -36,13 +36,15 @@ def get_languages():
     return group_0.wiki_languages
 
 
-def get_spacy_language_models()-> dict:
+def get_spacy_language_models() -> dict:
     language_models: dict = dict()
     for lang in get_languages():
         if lang == "de":
             model_name = "SPACY_LANGUAGE_MODEL_DE"
         elif lang == "en":
             model_name = "SPACY_LANGUAGE_MODEL_EN"
+        elif lang == "fr":
+            model_name = "SPACY_LANGUAGE_MODEL_FR"
         else:  # use multilingual model for other languages
             model_name = "SPACY_LANGUAGE_MODEL_XX"
         lang_model = config["SPACY_MODEL"][model_name]
@@ -50,7 +52,6 @@ def get_spacy_language_models()-> dict:
         print(f"loaded spacy language model: {lang_model}")
         nlp.add_pipe('sentencizer')
         language_models[lang] = nlp
-    # TODO: Load only once
     return language_models
 
 

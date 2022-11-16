@@ -12,7 +12,7 @@ def scrape_and_generate_data():
     print("Collecting groups...")
     group_0, group_1 = get_groups()
     _scrape_page_with_list(group_0)
-    _scrape_page_with_list(group_1)
+    #_scrape_page_with_list(group_1)
     print("")
     print("")
     print("----------------------------------")
@@ -37,12 +37,19 @@ def _scrape_page_with_list(group: Group):
         sub_page = wiki_api.page(page)
         if not sub_page.exists():
             print(f"IGNORED: {sub_page.title} PAGE DOESN'T EXIST...")
-        elif not _matches_defined_categories(group.wiki_categories, group.wiki_alternative_categories,
-                                             sub_page.categories.keys(), sub_page.sections[0].text):
-            print(f"IGNORED: {sub_page.title} CATEGORIES DIDN'T MATCH...")
         else:
-            print(f"FOUND: {sub_page.title} is {'or'.join(group.wiki_categories)}")
-            filtered_pages.append(page)
+            try:
+                page_content = sub_page.sections[0].text
+                if not _matches_defined_categories(group.wiki_categories, group.wiki_alternative_categories,
+                                                     sub_page.categories.keys(), page_content):
+                    print(f"IGNORED: {sub_page.title} CATEGORIES DIDN'T MATCH...")
+                else:
+                    print(f"FOUND: {sub_page.title} is {'or'.join(group.wiki_categories)}")
+                    filtered_pages.append(page)
+            except IndexError as err:
+                print(f"Error reading content of page {sub_page.title}")
+
+
 
     _scrape_pages(filtered_pages, group)
 
@@ -80,15 +87,17 @@ def _scrape_pages(pages_name: list, group: Group):
                     paragraphs = list()
                     paragraphs.append(wiki_page.summary)
                     paragraphs.append(wiki_page.sections[0].text)
-                    for section in wiki_page.sections[0].sections:
-                        if section.text == "":
-                            for subsection in section.sections:
-                                if subsection.text != "":
-                                    text_to_add = subsection.text
-                        else:
-                            text_to_add = section.text
+                    paragraphs += _get_all_sections(wiki_page.sections[0].sections)
+                    # TODO: add alternative to get full text
+                    #for section in wiki_page.sections[0].sections:
+                    #    if section.text == "":
+                    #        for subsection in section.sections:
+                    #            if subsection.text != "":
+                    #                text_to_add = subsection.text
+                    #    else:
+                    #        text_to_add = section.text
 
-                        paragraphs.append(text_to_add)
+                    #    paragraphs.append(text_to_add)
 
                     json_dict["paragraphs"] = paragraphs
                     text = ' '.join([p for p in paragraphs])
@@ -138,3 +147,11 @@ def _matches_defined_categories(defined_categories, defined_alternative_categori
 
     # else ignore this subpage/link
     return False
+
+
+def _get_all_sections(sections, level=0):
+    paragraphs = []
+    for s in sections:
+        paragraphs.append(s.text)
+        _get_all_sections(s.sections, level + 1)
+    return paragraphs

@@ -46,7 +46,8 @@ def get_documents_list(text_type='paragraphs'): # TODO: extend function to topic
         if text_type == 'sentences':
             sentences_list = get_dataframes()['sentences'].values.tolist()
             for sentence in sentences_list:
-                documents.extend(sentence)
+                if sentence != "":
+                    documents.extend(sentence)
         else:
             documents.extend(texts_list)
     print("Document_list:", documents)
@@ -134,7 +135,6 @@ def create_dataframes():
 
 
 def get_topic_of_every_doc(bertopic_model, docs, number_topics):
-    # TODO: mark author TTLAB
     """
     Author: Derived from https://github.com/mevbagci/Topic-Modelling/
     Returns list of topics for documents in docs.
@@ -148,14 +148,16 @@ def get_topic_of_every_doc(bertopic_model, docs, number_topics):
     for i in topics_names:
         topics_names_dict[i] = dict((x, y) for x, y in topics_names[i])
     for doc_i in docs:
-        topic_rep = bertopic_model.find_topics(doc_i, number_topics)
-        documents_per_document = {}
-        for c, topic_i in enumerate(topic_rep[0]):
-            documents_per_document[f"Topic {topic_i}"] = {
-                "Probability": topic_rep[1][c],
-                "topic": topics_names_dict[topic_i]
-            }
-        topic_list.append(documents_per_document)
+        if doc_i != "":
+            print(doc_i)
+            topic_rep = bertopic_model.find_topics(doc_i, number_topics)
+            documents_per_document = {}
+            for c, topic_i in enumerate(topic_rep[0]):
+                documents_per_document[f"Topic {topic_i}"] = {
+                    "Probability": topic_rep[1][c],
+                    "topic": topics_names_dict[topic_i]
+                }
+            topic_list.append(documents_per_document)
     return topic_list
 
 
@@ -200,7 +202,6 @@ def create_cleaned_dataframe_with_topics(bertopic_model, num_topics=5):
     topics_articles_list = get_topics_for_articles(bertopic_model, num_topics)
     topics_series = pd.Series((t for t in topics_articles_list))
     topics_list_series = pd.Series(([t] for t in topics_articles_list))
-    # TODO: why does it add a tab before words?
     topic_df.insert(2, "topics", topics_series)  # TODO: add paragraph_topics column with paragraph num of row for the topics
     topic_df.insert(3, "topics_lists", topics_list_series)  # TODO: add paragraph_topics column with paragraph num of row for the topics
     # add topics as strings to article words

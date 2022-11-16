@@ -4,6 +4,7 @@ from bertopic import BERTopic
 from data import get_documents_list, get_topic_modeling_path, get_top2vec_embedding_model, get_languages, \
     get_full_language_word, get_stop_words, get_dataframes
 from sklearn.feature_extraction.text import CountVectorizer
+from hdbscan import HDBSCAN
 
 
 def get_top2vec_model(text_type: str) -> Top2Vec:
@@ -45,14 +46,14 @@ def get_BERTopic_model(text_type: str) -> BERTopic:
 
         # case B: model trained on multilingual datasets
         if len(get_languages()) > 1:
-            language_model = "multilingual"             # TODO: try sentence transformer distiluse-base-multilingual-cased
+            language_model = "multilingual"
             for lang in get_languages()[1:]:
                 stopwords.extend(get_stop_words(lang))
 
         documents = get_documents_list(text_type)
         print(f"Training new model on {len(documents)} documents.")
         vectorizer_model = CountVectorizer(stop_words=stopwords)
-        topic_model = BERTopic(verbose=True, language=language_model, vectorizer_model=vectorizer_model)
+        topic_model = BERTopic(verbose=True,language=language_model, vectorizer_model=vectorizer_model)
         topics, probs = topic_model.fit_transform(documents)
         topic_model.save(bertopic_model_path)
         print(f"Loaded BERTopic model: {bertopic_model_path}")

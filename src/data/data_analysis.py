@@ -51,8 +51,10 @@ def counter(df: pd.DataFrame, language) -> Tuple[int,int,int]:
 
 def plot_pie_chart(group: Group, group_count_dict: dict, element: str, ax):
     # Plotting articles pie chart
+    #add colors
+    colors = ['#66b3ff','#99ff99','#ffcc99']
     sizes = [group_count_dict[group.label][lang][element] for lang in group.wiki_languages]
-    ax.pie(sizes, labels=group.wiki_languages, autopct=lambda pct: pct_func(pct, sizes))
+    ax.pie(sizes, labels=group.wiki_languages, autopct=lambda pct: pct_func(pct, sizes), colors=colors)
     ax.set_title(f"{group.label} - Distribution of {element}")
 
 
@@ -61,7 +63,7 @@ def plot_scraped_data():
     group_0_count_dict, group_1_count_dict = language_analyzer(group_0, group_1)
     # 3 Pie charts to be side by side
     for group, count_dict in [(group_0, group_0_count_dict), (group_1, group_1_count_dict)]:
-        fig, (ax1, ax2, ax3, ax4) = plt.subplots(1, 4, figsize=(20, 20))
+        fig, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1, figsize=(20, 20))
         for elem, ax in [(ARTICLES_STR, ax1), (PARAGRAPHS_STR, ax2), (SENTENCES_STR, ax3), (WORDS_STR, ax4)]:
             plot_pie_chart(group, count_dict, elem, ax)
             # get current figure
@@ -73,7 +75,7 @@ def plot_scraped_data():
         # save plot
         target = get_target_path().joinpath("reports/figures").resolve()
         target.mkdir(parents=True, exist_ok=True)
-        fig_out.savefig(target.joinpath(f"Sprachverteilungen_{group.label}.pdf"))
+        fig_out.savefig(target.joinpath(f"Sprachverteilungen_{group.label}.png"))
 
 
 def pct_func(pct, allvalues):

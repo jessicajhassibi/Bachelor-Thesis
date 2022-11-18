@@ -3,7 +3,7 @@ from data import get_fasttext_models_path, get_word2vec_models_path, get_languag
 from gensim import models
 
 
-def get_embedding_model(train_data, text_type, method= "Word2Vec"):
+def get_embedding_model(train_data, text_type, method="Word2Vec"):
     languages_string = "_".join(get_languages())
     if method == "Word2Vec":
         word2vec_models_path = get_word2vec_models_path().joinpath(f"Word2Vec_{languages_string}_{text_type}")
@@ -31,7 +31,7 @@ def get_embedding_model(train_data, text_type, method= "Word2Vec"):
         except FileNotFoundError as err:
             print("fastText model not found.")
             print(f"Training new model on {len(train_data)} documents.")
-            model = FastText(sentences=train_data, vector_size=300, window=5, min_count=2) # TODO: try different params
+            model = FastText(sentences=train_data, vector_size=300, window=5, min_count=2)
             print("Saving new model.")
             model.save(f"{fasttext_models_path}.bin")
             # save model as KeyedVectors

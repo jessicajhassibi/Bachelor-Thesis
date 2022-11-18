@@ -14,7 +14,7 @@ def get_dataframe_from_json(file: str):
     return df
 
 
-def get_documents_list(text_type='paragraphs'): # TODO: extend function to topics & cleaned sentences
+def get_documents_list(text_type='paragraphs'):  # TODO: extend function to topics & cleaned sentences
     """
     Get list of documents.
     Can be either 'texts', 'paragraphs' or 'sentences'
@@ -22,13 +22,22 @@ def get_documents_list(text_type='paragraphs'): # TODO: extend function to topic
     """
     documents = list()
 
-    if text_type == 'cleaned_texts' or text_type == 'topics':  # full (raw/ cleaned) text of article chosen as text type
+    if text_type == 'cleaned_texts':
+        documents.extend(get_cleaned_dataframe()[text_type].values.tolist())
+
+    elif text_type == 'topics':
         documents.extend(get_cleaned_dataframe_with_topics()[text_type].values.tolist())
 
     elif text_type == 'cleaned_texts_topics':
         documents.extend(get_cleaned_dataframe_with_topics()['cleaned_texts_topics'].values.tolist())
 
-    elif text_type == 'cleaned_paragraphs' or text_type == 'cleaned_paragraphs_topics' or text_type == 'cleaned_sentences':
+    elif text_type == 'cleaned_paragraphs' or text_type == 'cleaned_sentences':
+        paragraphs_list = get_cleaned_dataframe()[text_type].values.tolist()
+        for paragraphs in paragraphs_list:
+            for paragraph in paragraphs:
+                documents.append(paragraph)
+
+    elif text_type == 'cleaned_paragraphs_topics':
         paragraphs_list = get_cleaned_dataframe_with_topics()[text_type].values.tolist()
         for paragraphs in paragraphs_list:
             for paragraph in paragraphs:
@@ -39,8 +48,6 @@ def get_documents_list(text_type='paragraphs'): # TODO: extend function to topic
         for paragraphs in paragraphs_list:
             for paragraph in paragraphs:
                 documents.append(paragraph)
-
-
     else:
         texts_list = get_dataframes()['texts'].values.tolist()
         if text_type == 'sentences':
@@ -71,7 +78,7 @@ def clean_paragraphs_after_reading_csv(text: str) -> list:
     return cleaned_parags
 
 
-def get_cleaned_dataframes():
+def get_cleaned_dataframe():
     lang_dfs_list = []
     for lang in get_languages():
         # apply conversion to cleaned_text to avoid multiple quotation marks due to wrong pandas csv reading
@@ -198,7 +205,7 @@ def get_cleaned_dataframe_with_topics():
 
 def create_cleaned_dataframe_with_topics(bertopic_model, num_topics=5):
     languages_string = "_".join(get_languages())
-    topic_df = get_cleaned_dataframes()
+    topic_df = get_cleaned_dataframe()
     topics_articles_list = get_topics_for_articles(bertopic_model, num_topics)
     topics_series = pd.Series((t for t in topics_articles_list))
     topics_list_series = pd.Series(([t] for t in topics_articles_list))

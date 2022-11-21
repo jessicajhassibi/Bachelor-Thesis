@@ -63,6 +63,16 @@ def get_fasttext_models_path():
     fasttext_models_folder.mkdir(parents=True, exist_ok=True)
     return fasttext_models_folder
 
+def get_fasttext_aligned_models_path():
+    fasttext_aligned_models_folder: Path = get_fasttext_models_path().joinpath('aligned_embeddings')
+    fasttext_aligned_models_folder.mkdir(parents=True, exist_ok=True)
+    return fasttext_aligned_models_folder
+
+
+def get_fasttext_pretrained_aligned_models_path():
+    fasttext_aligned_pretrained_models_folder: Path = get_fasttext_aligned_models_path().joinpath('pretrained')
+    fasttext_aligned_pretrained_models_folder.mkdir(parents=True, exist_ok=True)
+    return fasttext_aligned_pretrained_models_folder
 
 
 

@@ -11,21 +11,20 @@ def text2vec(text, keyed_vectors):
     # takes gensim KeyedVectors object  and pandas series object of preprocessed sentences
     # and maps each word in the sentences to the corresponding vector
     # returns numpy array (for the text) of numpy arrays (sentences) of vectors (words)
-
     words = set(keyed_vectors.index_to_key)
     text_vect = np.array([np.array([keyed_vectors[i] for i in sentence if i in words])
                           for sentence in text])
     return text_vect
 
 
-def average_vector(text_vect):
+def average_text_vector(text_vect):
     # Compute sentence vectors by averaging the word vectors for the words contained in the sentence
     avg = []
     for sentence in text_vect:
         if sentence.size:
             avg.append(sentence.mean(axis=0))
         else:
-            avg.append(np.zeros(100, dtype=float))
+            avg.append(np.zeros(300, dtype=float))
     return avg
 
 

@@ -53,9 +53,10 @@ def get_BERTopic_model(text_type: str) -> BERTopic:
         documents = get_documents_list(text_type)
         print(f"Training new model on {len(documents)} documents.")
         vectorizer_model = CountVectorizer(stop_words=stopwords)
-        topic_model = BERTopic(verbose=True,language=language_model, vectorizer_model=vectorizer_model)
+        hdbscan_model = HDBSCAN(min_cluster_size=10, metric='euclidean',
+                                cluster_selection_method='eom', prediction_data=True, min_samples=1)
+        topic_model = BERTopic(verbose=True, language=language_model, vectorizer_model=vectorizer_model, hdbscan_model=hdbscan_model, calculate_probabilities=True, min_topic_size=300)
         topics, probs = topic_model.fit_transform(documents)
         topic_model.save(bertopic_model_path)
         print(f"Loaded BERTopic model: {bertopic_model_path}")
     return topic_model
-

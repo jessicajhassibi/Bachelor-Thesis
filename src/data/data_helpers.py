@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 import pandas as pd
 from ast import literal_eval
@@ -32,10 +32,10 @@ def get_documents_list(text_type='paragraphs'):  # TODO: extend function to topi
         documents.extend(get_cleaned_dataframe_with_topics()['cleaned_texts_topics'].values.tolist())
 
     elif text_type == 'cleaned_paragraphs' or text_type == 'cleaned_sentences':
-        paragraphs_list = get_cleaned_dataframe()[text_type].values.tolist()
-        for paragraphs in paragraphs_list:
-            for paragraph in paragraphs:
-                documents.append(paragraph)
+        text_type_list = get_cleaned_dataframe()[text_type].values.tolist()
+        for texts in text_type_list:
+            for text in texts:
+                documents.append(text)
 
     elif text_type == 'cleaned_paragraphs_topics':
         paragraphs_list = get_cleaned_dataframe_with_topics()[text_type].values.tolist()
@@ -57,8 +57,22 @@ def get_documents_list(text_type='paragraphs'):  # TODO: extend function to topi
                     documents.extend(sentence)
         else:
             documents.extend(texts_list)
-    print("Document_list:", documents)
     return documents
+
+
+def get_sentences_and_labels_lists():
+    sentences_out, labels_out = [], []
+    df = get_dataframes()
+    sentences_list = df['sentences'].values.tolist()
+    labels_list = df['label'].values.tolist()
+    for i in range(len(sentences_list)):
+        sentences = sentences_list[i]
+        label = labels_list[i]
+        for sentence in sentences:
+            labels_out.append(label)
+            sentences_out.append(sentence)
+    return sentences_out, labels_out
+
 
 
 def clean_str_for_df(text: str) -> str:
@@ -84,8 +98,8 @@ def get_cleaned_dataframe():
         # apply conversion to cleaned_text to avoid multiple quotation marks due to wrong pandas csv reading
         lang_df = pd.read_csv(get_cleaned_dataframes_path().joinpath(f"{lang}_df_cleaned.csv").resolve(),
                               converters={'cleaned_texts': lambda x: clean_words_after_reading_csv(x),
-                                          'cleaned_paragraphs': lambda x: clean_paragraphs_after_reading_csv(
-                                              x)})
+                                          'cleaned_paragraphs': lambda x: clean_paragraphs_after_reading_csv(x),
+                                          'cleaned_sentences': lambda x: clean_paragraphs_after_reading_csv(x)})
         lang_dfs_list.append(lang_df)
     df = pd.concat(lang_dfs_list)
     df.drop(labels="Unnamed: 0", axis="columns", inplace=True)
@@ -141,51 +155,55 @@ def create_dataframes():
         cleaned_df.to_csv(get_cleaned_dataframes_path().joinpath(f'{lang}_df_cleaned.csv'))
 
 
-def get_topic_of_every_doc(bertopic_model, docs, number_topics):
+def get_topic_of_every_doc(bertopic_model, docs, number_topics) -> List[dict]:
     """
     Author: Derived from https://github.com/mevbagci/Topic-Modelling/
     Returns list of topics for documents in docs.
     For each document it stores the topics in a dictionary of topics.
     Those Topics consist of 10 words defining that topic."""
-    topic_list = []
+    topic_reps: List[dict] = []
     topics_names = bertopic_model.get_topics()
     if number_topics > len(topics_names):
         number_topics = len(topics_names)
     topics_names_dict = {}
     for i in topics_names:
-        topics_names_dict[i] = dict((x, y) for x, y in topics_names[i])
+        topics_names_dict[i] = dict((topic_word, prob) for topic_word, prob in topics_names[i])
     for doc_i in docs:
-        if doc_i != "":
-            print(doc_i)
-            topic_rep = bertopic_model.find_topics(doc_i, number_topics)
-            documents_per_document = {}
+        for sentence in doc_i:
+            print("Analysing sentence=", sentence)
+            topic_rep = bertopic_model.find_topics(sentence, number_topics)
+            topic_rep_dict = {}
             for c, topic_i in enumerate(topic_rep[0]):
-                documents_per_document[f"Topic {topic_i}"] = {
+                topic_rep_dict[f"Topic {topic_i}"] = {
                     "Probability": topic_rep[1][c],
                     "topic": topics_names_dict[topic_i]
                 }
-            topic_list.append(documents_per_document)
-    return topic_list
+            topic_reps.append(topic_rep_dict)
+    return topic_reps
 
 
-def get_topics_for_articles(bertopic_model, num_topics):
+def get_topics_probs_for_articles(bertopic_model, num_topics):
     """
     Finds fixed number of most probable topics of articles.
     Creates a list for the num_topics * 10 topic words (10 words describe one topic) for each article.
     Returns list of lists.
     """
     topics_for_each_article = []
+    topics_distributions_for_each_article = []
     documents = get_dataframes()["sentences"]
-    topic_list = get_topic_of_every_doc(bertopic_model, documents, num_topics)
-    for article_topics in topic_list:
+    topic_reps: List[dict] = get_topic_of_every_doc(bertopic_model, documents, num_topics)
+    for topic_rep_dict in topic_reps:
         article_topics_words = []
-        for topic_dict in article_topics:
-            topic_words = article_topics[topic_dict].get("topic").keys()
+        article_probabilities = []
+        for topic, topic_info_dict in topic_rep_dict.items():
+            topic_words = topic_info_dict.get("topic").keys()
             # append topic words for article to list for all articles
-            article_topics_words.extend(list(topic_words))
+            article_topics_words.extend(topic_words)
+            probabilities = topic_info_dict.get("topic").values()
+            article_probabilities.extend(probabilities)
         topics_for_each_article.append(article_topics_words)
-    return topics_for_each_article
-
+        topics_distributions_for_each_article.append(article_probabilities)
+    return topics_for_each_article, topics_distributions_for_each_article
 
 def get_cleaned_dataframe_with_topics():
     languages_string = "_".join(get_languages())
@@ -206,14 +224,12 @@ def get_cleaned_dataframe_with_topics():
 def create_cleaned_dataframe_with_topics(bertopic_model, num_topics=5):
     languages_string = "_".join(get_languages())
     topic_df = get_cleaned_dataframe()
-    topics_articles_list = get_topics_for_articles(bertopic_model, num_topics)
-    topics_series = pd.Series((t for t in topics_articles_list))
-    topics_list_series = pd.Series(([t] for t in topics_articles_list))
-    topic_df.insert(2, "topics", topics_series)  # TODO: add paragraph_topics column with paragraph num of row for the topics
-    topic_df.insert(3, "topics_lists", topics_list_series)  # TODO: add paragraph_topics column with paragraph num of row for the topics
-    # add topics as strings to article words
+    topics_articles_list, topics_distributions_list = get_topics_probs_for_articles(bertopic_model, num_topics)
+    topics_articles_series = pd.Series(t for t in topics_articles_list)
+    topics_distributions_series = pd.Series(t for t in topics_distributions_list)
+    topic_df.insert(2, "topics", topics_articles_series)
+    topic_df.insert(3, "topics_distribution", topics_distributions_series)
+    # add topic words as strings to article words
     topic_df.insert(4, "cleaned_texts_topics", topic_df["cleaned_texts"] + topic_df["topics"])
-    # add topics as list of words to paragraphs list = additional topics paragraph
-    topic_df.insert(5, 'cleaned_paragraphs_topics', topic_df["cleaned_paragraphs"] + topic_df["topics_lists"])
     topic_df.to_csv(get_cleaned_dataframes_path().joinpath(f'{num_topics}_topics_{languages_string}.csv'))
     return topic_df

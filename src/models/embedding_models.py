@@ -16,7 +16,7 @@ def get_embedding_model(train_data, text_type="cleaned_texts", method="Word2Vec"
         except FileNotFoundError as err:
             print("Word2Vec model not found.")
             print(f"Training new model on {len(train_data)} documents.")
-            model = Word2Vec(sentences=train_data, vector_size=100, window=5, min_count=2) # TODO: try different params
+            model = Word2Vec(sentences=train_data, vector_size=300, window=5, min_count=2) # TODO: try different params
             print("Saving new model.")
             model.save(f"{word2vec_models_path}.bin")
             # save model as KeyedVectors

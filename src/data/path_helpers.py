@@ -52,6 +52,11 @@ def get_classification_models_path():
     classification_models_folder.mkdir(parents=True, exist_ok=True)
     return classification_models_folder
 
+def get_sbert_models_path():
+    sbert_models_folder: Path = get_classification_models_path().joinpath('SentenceTransformer')
+    sbert_models_folder.mkdir(parents=True, exist_ok=True)
+    return sbert_models_folder
+
 
 def get_word2vec_models_path():
     word2vec_models_folder: Path = get_classification_models_path().joinpath('Word2Vec')

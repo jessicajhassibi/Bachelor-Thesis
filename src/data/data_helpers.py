@@ -60,32 +60,22 @@ def get_documents_list(text_type='paragraphs'):  # TODO: extend function to topi
     return documents
 
 
-def get_sentences_and_labels_lists():
-    sentences_out, labels_out = [], []
-    df = get_dataframes()
-    sentences_list = df['sentences'].values.tolist()
+def get_data_and_labels_lists(text_type="sentences"):
+    data_out, labels_out = [], []
+    df= None
+    if text_type == "sentences":
+        df = get_dataframes()
+    else:
+        df = get_cleaned_dataframe()
+    data_list = df[text_type].values.tolist()
     labels_list = df['label'].values.tolist()
-    for i in range(len(sentences_list)):
-        sentences = sentences_list[i]
+    for i in range(len(data_list)):
+        docs = data_list[i]
         label = labels_list[i]
-        for sentence in sentences:
+        for doc in docs:
             labels_out.append(label)
-            sentences_out.append(sentence)
-    return sentences_out, labels_out
-
-
-def get_cleaned_sentences_and_labels_lists():
-    sentences_out, labels_out = [], []
-    df = get_cleaned_dataframe()
-    sentences_list = df['cleaned_sentences'].values.tolist()
-    labels_list = df['label'].values.tolist()
-    for i in range(len(sentences_list)):
-        sentences = sentences_list[i]
-        label = labels_list[i]
-        for sentence in sentences:
-            labels_out.append(label)
-            sentences_out.append(sentence)
-    return sentences_out, labels_out
+            data_out.append(doc)
+    return data_out, labels_out
 
 
 def clean_str_for_df(text: str) -> str:

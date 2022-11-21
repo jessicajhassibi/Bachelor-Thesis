@@ -74,6 +74,19 @@ def get_sentences_and_labels_lists():
     return sentences_out, labels_out
 
 
+def get_cleaned_sentences_and_labels_lists():
+    sentences_out, labels_out = [], []
+    df = get_cleaned_dataframe()
+    sentences_list = df['cleaned_sentences'].values.tolist()
+    labels_list = df['label'].values.tolist()
+    for i in range(len(sentences_list)):
+        sentences = sentences_list[i]
+        label = labels_list[i]
+        for sentence in sentences:
+            labels_out.append(label)
+            sentences_out.append(sentence)
+    return sentences_out, labels_out
+
 
 def clean_str_for_df(text: str) -> str:
     return text.replace("[", "").replace("]", "").replace("'", "")

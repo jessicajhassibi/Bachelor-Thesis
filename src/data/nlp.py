@@ -50,7 +50,8 @@ def get_sentences(texts: list, lang):
         doc = nlp(text)
         sentences_in_text = []
         for sent in list(doc.sents):
-            sentences_in_text.append(sent.text)
+            cleaned_sentence = sent.text.replace('\n', '')
+            sentences_in_text.append(cleaned_sentence)
         sentences.append(sentences_in_text)
     return sentences
 

@@ -50,7 +50,8 @@ def get_embedding_model(train_data, text_type="cleaned_texts", method="Word2Vec"
             except FileNotFoundError as err:
                 print("fastText model not found.")
                 if len(get_languages()) == 1:
-                    print("Please download a pretrained model before using this method.")
+                    fasttext_models_path = get_fasttext_aligned_models_path().joinpath(f"{text_type}/de_en/vectors-{languages_string}.txt")
+                    wv = models.KeyedVectors.load_word2vec_format(fasttext_models_path, binary=False)
                 else:
                     print("Concatenating monolingual aligned word embeddings to receive multilingual aligned word embeddings.")
                     with open(fasttext_models_path, 'w', errors='ignore', encoding="utf8") as multiling_out:
@@ -69,10 +70,12 @@ def get_embedding_model(train_data, text_type="cleaned_texts", method="Word2Vec"
                         multiling_out.writelines(lines[:-1])
                     # load model as KeyedVectors
                     wv = models.KeyedVectors.load_word2vec_format(fasttext_models_path, binary=False)
-        else:
+        elif training_type == "from_scratch" and len(get_languages()) == 1:
+            muse_models_path = get_fasttext_aligned_models_path().joinpath(f"{text_type}/vectors-{languages_string}.txt")
+            wv = models.KeyedVectors.load_word2vec_format(muse_models_path, binary=False)
+        elif training_type == "from_scratch":
             muse_models_path = get_fasttext_aligned_models_path().joinpath(f"{training_type}/{languages_string}_{text_type}.txt")
             try:
-                model = None
                 # load model as KeyedVectors
                 wv = models.KeyedVectors.load_word2vec_format(muse_models_path, binary=False)
             except FileNotFoundError as err:
@@ -97,6 +100,5 @@ def get_embedding_model(train_data, text_type="cleaned_texts", method="Word2Vec"
                         lines.append("\n")
                     outfile.write(f"{count} {emb_dim}\n")
                     outfile.writelines(lines)
-                model = None
                 wv = models.KeyedVectors.load_word2vec_format(muse_models_path, binary=False)
     return model, wv

@@ -43,27 +43,31 @@ def get_documents_list(text_type='paragraphs'):  # TODO: extend function to topi
             for paragraph in paragraphs:
                 documents.append(paragraph)
 
-    elif text_type == 'paragraphs':
-        paragraphs_list = get_dataframes()['paragraphs'].values.tolist()
-        for paragraphs in paragraphs_list:
-            for paragraph in paragraphs:
-                documents.append(paragraph)
+    elif text_type == 'sentences':
+        sentences_list = get_dataframes()[text_type].values.tolist()
+        for sents in sentences_list:
+            for sent in sents:
+                new_sent = sent.replace('\n', '')
+                if new_sent != "":
+                    print(new_sent)
+                    documents.append(new_sent)
+
+    elif text_type == "paragraphs":
+        sentences_list = get_dataframes()[text_type].values.tolist()
+        for sents in sentences_list:
+            for sent in sents:
+                new_sent = sent.replace('\n', '')
+                documents.append(new_sent)
     else:
         texts_list = get_dataframes()['texts'].values.tolist()
-        if text_type == 'sentences':
-            sentences_list = get_dataframes()['sentences'].values.tolist()
-            for sentence in sentences_list:
-                if sentence != "":
-                    documents.extend(sentence)
-        else:
-            documents.extend(texts_list)
+        documents.extend(texts_list)
     return documents
 
 
 def get_data_and_labels_lists(text_type="sentences"):
     data_out, labels_out = [], []
-    df= None
-    if text_type == "sentences":
+    df = None
+    if text_type == "sentences" or text_type == "paragraphs":
         df = get_dataframes()
     else:
         df = get_cleaned_dataframe()
@@ -75,7 +79,16 @@ def get_data_and_labels_lists(text_type="sentences"):
         for doc in docs:
             labels_out.append(label)
             data_out.append(doc)
+    if text_type == "paragraphs":
+        new_data_out = []
+        for p in get_documents_list("paragraphs"):
+            new_data_out.append([p])
+        data_out = new_data_out
     return data_out, labels_out
+
+
+#def get_paragraphs_labels():
+
 
 
 def clean_str_for_df(text: str) -> str:
@@ -206,9 +219,11 @@ def get_topics_probs_for_articles(bertopic_model, num_topics):
             article_probabilities.extend(probabilities)
         topics_for_each_article.append(article_topics_words)
         topics_distributions_for_each_article.append(article_probabilities)
+
     return topics_for_each_article, topics_distributions_for_each_article
 
-def get_cleaned_dataframe_with_topics():
+
+def get_cleaned_dataframe_with_topics(for_articles=True, for_parags=False):
     languages_string = "_".join(get_languages())
     # apply conversion to cleaned_text to avoid multiple quotation marks due to wrong pandas csv reading
     topics_df = pd.read_csv(get_cleaned_dataframes_path().joinpath(f'5_topics_{languages_string}.csv').resolve(),
@@ -227,6 +242,7 @@ def get_cleaned_dataframe_with_topics():
 def create_cleaned_dataframe_with_topics(bertopic_model, num_topics=5):
     languages_string = "_".join(get_languages())
     topic_df = get_cleaned_dataframe()
+
     topics_articles_list, topics_distributions_list = get_topics_probs_for_articles(bertopic_model, num_topics)
     topics_articles_series = pd.Series(t for t in topics_articles_list)
     topics_distributions_series = pd.Series(t for t in topics_distributions_list)
@@ -234,5 +250,6 @@ def create_cleaned_dataframe_with_topics(bertopic_model, num_topics=5):
     topic_df.insert(3, "topics_distribution", topics_distributions_series)
     # add topic words as strings to article words
     topic_df.insert(4, "cleaned_texts_topics", topic_df["cleaned_texts"] + topic_df["topics"])
+
     topic_df.to_csv(get_cleaned_dataframes_path().joinpath(f'{num_topics}_topics_{languages_string}.csv'))
     return topic_df

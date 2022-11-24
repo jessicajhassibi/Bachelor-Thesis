@@ -51,6 +51,7 @@ def get_BERTopic_model(text_type: str) -> BERTopic:
                 stopwords.extend(get_stop_words(lang))
 
         documents = get_documents_list(text_type)
+        documents = [x for x in documents if x]
         print(f"Training new model on {len(documents)} documents.")
         vectorizer_model = CountVectorizer(stop_words=stopwords)
         hdbscan_model = HDBSCAN(min_cluster_size=10, metric='euclidean',

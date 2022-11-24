@@ -79,5 +79,9 @@ def get_fasttext_pretrained_aligned_models_path():
     fasttext_aligned_pretrained_models_folder.mkdir(parents=True, exist_ok=True)
     return fasttext_aligned_pretrained_models_folder
 
+def get_datasets_path() -> Path:
+    datasets_folder: Path = Path("../notebooks/datasets").resolve()
+    datasets_folder.mkdir(parents=True, exist_ok=True)
+    return datasets_folder
 
 

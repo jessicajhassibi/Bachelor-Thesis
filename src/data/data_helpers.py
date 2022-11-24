@@ -223,10 +223,10 @@ def get_topics_probs_for_articles(bertopic_model, num_topics):
     return topics_for_each_article, topics_distributions_for_each_article
 
 
-def get_cleaned_dataframe_with_topics(for_articles=True, for_parags=False):
+def get_cleaned_dataframe_with_topics(num_topics=3, for_articles=True, for_parags=False):
     languages_string = "_".join(get_languages())
     # apply conversion to cleaned_text to avoid multiple quotation marks due to wrong pandas csv reading
-    topics_df = pd.read_csv(get_cleaned_dataframes_path().joinpath(f'5_topics_{languages_string}.csv').resolve(),
+    topics_df = pd.read_csv(get_cleaned_dataframes_path().joinpath(f'{num_topics}_topics_{languages_string}.csv').resolve(),
                           converters={'cleaned_texts': lambda x: clean_words_after_reading_csv(x),
                                       'cleaned_paragraphs': lambda x: clean_paragraphs_after_reading_csv(x),
                                       'cleaned_sentences': lambda x: clean_paragraphs_after_reading_csv(x),

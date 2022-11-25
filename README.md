@@ -3,7 +3,7 @@
 Code for my bachelor's thesis. 
 
 Performs NLP analysis and binary classification over the wikipedia articles of two wikipedia lists. \
-The code is generic! \
+The code is generic in most parts! \
 You can suit it to your problem by changing the groups.ini file and placing your lists urls and the wiki categories you are looking for there. 
 
 My two lists/ classes are:

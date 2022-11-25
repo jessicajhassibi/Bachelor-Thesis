@@ -17,7 +17,7 @@ In the period of National Socialism in Germany the Nazis basically classified co
 - "Degenerated" Composers which were persecuted or killed by them
 
 Given the labels created by the Nazis: \
-<b>Can we train a Machine Learning model that is able to correctly classify a composer by his biography on wikipedia?</b>
+<b>Can we train a classification model that is able to correctly classify a composer by his biography on wikipedia?</b>
 
 ## How-to's
 
@@ -25,8 +25,7 @@ Run project by executing the jupyter notebooks in ascending order:
 * 0_data_scraping.ipynb
 * 1_data_analysis.ipynb
 * 2_data_preparation.ipynb
-* 3_topic_modeling.ipynb
-* 4_word2vec_text_classification.ipynb
+etc.
 
 
 ### setup

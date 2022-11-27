@@ -7,6 +7,6 @@ from .data_helpers import get_documents_list, get_cleaned_dataframe,\
     get_cleaned_dataframe_with_topics, get_data_and_labels_lists
 from .path_helpers import get_topic_modeling_path, get_classification_models_path, get_fasttext_models_path, \
     get_word2vec_models_path, get_fasttext_pretrained_aligned_models_path, get_fasttext_aligned_models_path, \
-    get_sbert_models_path, get_datasets_path
+    get_sbert_models_path, get_datasets_path, get_datasets_embedding_classification_path
 from .config_helpers import get_groups, get_languages, get_top2vec_embedding_model
 from .nlp_helpers import get_full_language_word, get_stop_words

@@ -101,9 +101,7 @@ jupyter notebook --port=8888 --no-browser --allow-root --ip='*' --NotebookApp.to
 
 Jupyter notebook are under [http://localhost:8888](http://localhost:8888)
 
-### download pretrained word vectors
-
-We use the Glove vectors trained on Wikipedia 2014 and Gigaword 5.\
-[Get them here](https://nlp.stanford.edu/projects/glove/) and place to models/word_vectors.
+### download spacy models for your languages
+# e.g. python3 -m spacy download en_core_web_sm
 
 

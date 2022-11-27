@@ -84,4 +84,7 @@ def get_datasets_path() -> Path:
     datasets_folder.mkdir(parents=True, exist_ok=True)
     return datasets_folder
 
-
+def get_datasets_embedding_classification_path() -> Path:
+    dataset_enbedding_classification_folder: Path = Path("../notebooks/datasets_embedding_classification").resolve()
+    dataset_enbedding_classification_folder.mkdir(parents=True, exist_ok=True)
+    return dataset_enbedding_classification_folder

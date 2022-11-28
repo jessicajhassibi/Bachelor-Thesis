@@ -99,9 +99,9 @@ When installations are done run jupyter notebook in container.
 jupyter notebook --port=8888 --no-browser --allow-root --ip='*' --NotebookApp.token='' --NotebookApp.password=''
 ```
 
-Jupyter notebook are under [http://localhost:8888](http://localhost:8888)
+Jupyter notebooks are under [http://localhost:8888](http://localhost:8888)
 
 ### download spacy models for your languages
-# e.g. python3 -m spacy download en_core_web_sm
+e.g. python3 -m spacy download en_core_web_sm
 
 

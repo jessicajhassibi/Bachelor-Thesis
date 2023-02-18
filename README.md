@@ -17,8 +17,8 @@ In the period of National Socialism in Germany the Nazis basically classified co
 - "Degenerated" Composers which were persecuted or killed by them
 
 Given the labels created by the Nazis: \
-<b>Can we train a classification model that is able to correctly classify a composer by his biography on wikipedia?</b>
-<b>How does the combination of state-of-the-art topic modeling (with BERTopic) influence traditional classification methods?</b>
+<b>Can we train a classification model that is able to correctly classify a composer by his biography on wikipedia?</b> \
+<b>How does the combination of state-of-the-art topic modeling (with BERTopic) influence traditional classification methods?</b> \
 <b>Can Vector Space Alignment improve classification with word embedding techniques?</b>
 
 ## How-to's
